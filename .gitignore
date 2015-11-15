@@ -20,3 +20,4 @@ $RECYCLE.BIN/
 # Visual Studio
 *.opensdf
 *.sdf
+.vs
