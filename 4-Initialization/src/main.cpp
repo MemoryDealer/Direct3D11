@@ -1,18 +1,17 @@
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
-/// \file D3DApp.h
+/// \file main.cpp
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-#pragma once
-
-// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
-
-#include "D3DUtil.h"
+#include "D3DApp.h"
+#include <Windows.h>
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-namespace D3DApp {
-
-
+int WINAPI WinMain( HINSTANCE hInstance,
+                    HINSTANCE hPrevInstance,
+                    PSTR cmdLine,
+                    int showCmd )
+{
 
 }
 

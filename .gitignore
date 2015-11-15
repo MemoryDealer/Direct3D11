@@ -21,3 +21,10 @@ $RECYCLE.BIN/
 *.opensdf
 *.sdf
 .vs
+*.tlog
+*.log
+*.lastbuildstate
+unsuccessfulbuild
+*.obj
+*.idb
+*.pdb
