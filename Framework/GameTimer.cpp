@@ -8,7 +8,7 @@
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-using namespace D3DApp;
+//using namespace D3DApp;
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
@@ -35,6 +35,10 @@ float GameTimer::totalTime( void ) const
     if ( mStopped ) {
         return static_cast<float>( ( ( 
             mStopTime - mPausedTime ) - mBaseTime ) * mSecondsPerCount );
+    }
+    else {
+        return static_cast<float>( ( ( 
+            mCurrTime - mPausedTime ) - mBaseTime ) * mSecondsPerCount );
     }
 }
 
