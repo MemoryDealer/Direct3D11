@@ -30,3 +30,7 @@ unsuccessfulbuild
 *.pdb
 *.ilk
 
+# Directories/files
+Debug
+Release
+*.exe
