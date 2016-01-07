@@ -28,14 +28,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -69,18 +69,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)\Framework;$(IncludePath)</IncludePath>
+    <IncludePath>$(D3D11_FRAMEWORK);$(IncludePath)</IncludePath>
+    <LibraryPath>$(D3D11_FRAMEWORK)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)\Framework;$(IncludePath)</IncludePath>
+    <IncludePath>$(D3D11_FRAMEWORK);$(IncludePath)</IncludePath>
+    <LibraryPath>$(D3D11_FRAMEWORK)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)\Framework;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\Framework;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(D3D11_FRAMEWORK);$(IncludePath)</IncludePath>
+    <LibraryPath>$(D3D11_FRAMEWORK)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)\Framework;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\Framework;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(D3D11_FRAMEWORK);$(IncludePath)</IncludePath>
+    <LibraryPath>$(D3D11_FRAMEWORK)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,7 +91,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;dwrite.lib;d3dcompiler.lib;Effects11d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;dwrite.lib;d3dcompiler.lib;Effects11d-x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -100,6 +102,9 @@
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;dwrite.lib;d3dcompiler.lib;Effects11d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -112,7 +117,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;dwrite.lib;d3dcompiler.lib;Effects11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;dwrite.lib;d3dcompiler.lib;Effects11-x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -128,22 +133,23 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;dwrite.lib;d3dcompiler.lib;Effects11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Framework\D3DApp.cpp" />
-    <ClCompile Include="Framework\dxerr.cpp" />
-    <ClCompile Include="Framework\GameTimer.cpp" />
-    <ClCompile Include="Framework\MathHelper.cpp" />
+    <ClCompile Include="..\Framework\D3DApp.cpp" />
+    <ClCompile Include="..\Framework\dxerr.cpp" />
+    <ClCompile Include="..\Framework\GameTimer.cpp" />
+    <ClCompile Include="..\Framework\MathHelper.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Framework\D3DApp.h" />
-    <ClInclude Include="Framework\D3DUtil.h" />
-    <ClInclude Include="Framework\d3dx11effect.h" />
-    <ClInclude Include="Framework\dxerr.h" />
-    <ClInclude Include="Framework\GameTimer.h" />
-    <ClInclude Include="Framework\MathHelper.h" />
+    <ClInclude Include="..\Framework\D3DApp.h" />
+    <ClInclude Include="..\Framework\D3DUtil.h" />
+    <ClInclude Include="..\Framework\d3dx11effect.h" />
+    <ClInclude Include="..\Framework\dxerr.h" />
+    <ClInclude Include="..\Framework\GameTimer.h" />
+    <ClInclude Include="..\Framework\MathHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
