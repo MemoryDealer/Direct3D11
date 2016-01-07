@@ -11,6 +11,8 @@
 #include <crtdbg.h>
 #endif
 
+#include <D3D11.h>
+#include <DXGI.h>
 #include <D3DX11.h>
 #include <xnamath.h>
 #include <DxErr.h>
