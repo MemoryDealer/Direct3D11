@@ -15,12 +15,12 @@ struct Vertex {
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-class BoxApp : public D3DApp {
+class App : public D3DApp {
 
 public:
 
-    BoxApp( HINSTANCE hInst );
-    virtual ~BoxApp( void ) override;
+    App( HINSTANCE hInst );
+    virtual ~App( void ) override;
 
     virtual bool init( void ) override;
     virtual void onResize( void ) override;
@@ -76,7 +76,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE prevInstance,
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-BoxApp::BoxApp( HINSTANCE hInstance )
+App::App( HINSTANCE hInstance )
     : D3DApp( hInstance )
     , mBoxVB( nullptr )
     , mBoxIB( nullptr )
@@ -100,7 +100,7 @@ BoxApp::BoxApp( HINSTANCE hInstance )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-BoxApp::~BoxApp( void )
+App::~App( void )
 {
     ReleaseCOM( mBoxVB );
     ReleaseCOM( mBoxIB );
@@ -110,7 +110,7 @@ BoxApp::~BoxApp( void )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-bool BoxApp::init( void )
+bool App::init( void )
 {
     if ( !D3DApp::init() ) {
         return false;
@@ -125,7 +125,7 @@ bool BoxApp::init( void )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void BoxApp::onResize( void )
+void App::onResize( void )
 {
     D3DApp::onResize();
 
@@ -139,7 +139,7 @@ void BoxApp::onResize( void )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void BoxApp::updateScene( const float dt )
+void App::updateScene( const float dt )
 {
     // Convert spherical to cartesian.
     float x = mRadius * sinf( mPhi ) * cosf( mTheta );
@@ -157,7 +157,7 @@ void BoxApp::updateScene( const float dt )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void BoxApp::drawScene( void )
+void App::drawScene( void )
 {
     mD3DImmediateContext->ClearRenderTargetView( mRenderTargetView,
                                                  reinterpret_cast<const float*>( &Colors::LightSteelBlue ) );
@@ -201,7 +201,7 @@ void BoxApp::drawScene( void )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void BoxApp::onMouseDown( WPARAM btnState, int x, int y )
+void App::onMouseDown( WPARAM btnState, int x, int y )
 {
     mLastMousePos.x = x;
     mLastMousePos.y = y;
@@ -211,14 +211,14 @@ void BoxApp::onMouseDown( WPARAM btnState, int x, int y )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void BoxApp::onMouseUp( WPARAM btnState, int x, int y )
+void App::onMouseUp( WPARAM btnState, int x, int y )
 {
     ReleaseCapture();
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void BoxApp::onMouseMove( WPARAM btnState, int x, int y )
+void App::onMouseMove( WPARAM btnState, int x, int y )
 {
     if ( ( btnState & MK_LBUTTON ) != 0 ) {
         // Correspond each pixel to a quarter of a degree.
@@ -251,7 +251,7 @@ void BoxApp::onMouseMove( WPARAM btnState, int x, int y )
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void BoxApp::buildGeometryBuffers( void )
+void App::buildGeometryBuffers( void )
 {
     Vertex vertices [] = {
         { DirectX::XMFLOAT3( -1.f, -1.f, -1.f ), static_cast<const DirectX::XMFLOAT4>( Colors::White ) },
@@ -320,7 +320,7 @@ void BoxApp::buildGeometryBuffers( void )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void BoxApp::buildFX( void )
+void App::buildFX( void )
 {
     DWORD shaderFlags = 0;
 #if defined( DEBUG ) || defined ( _DEBUG )   
@@ -391,7 +391,7 @@ void BoxApp::buildFX( void )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void BoxApp::buildVertexLayout( void )
+void App::buildVertexLayout( void )
 {
     // Create vertex input layout.
     D3D11_INPUT_ELEMENT_DESC vertexDesc [] = {
