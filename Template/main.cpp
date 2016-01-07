@@ -349,10 +349,14 @@ void BoxApp::buildFX( void )
                                      &compilationMsgs );
 
     if ( compilationMsgs != nullptr ) {
-        /*MessageBoxA( 0,
-                     static_cast<char*>( compilationMsgs->GetBufferPointer() ),
-                     nullptr,
-                     0 );*/
+        // Filter out warning about deprecated compiler since effects are being used.
+        if ( std::strstr( static_cast<const char*>( compilationMsgs->GetBufferPointer() ), 
+                          "X4717" ) == 0 ) {
+            MessageBoxA( 0,
+                         static_cast<char*>( compilationMsgs->GetBufferPointer() ),
+                         nullptr,
+                         0 );
+        }
         ReleaseCOM( compilationMsgs );
     }
 
