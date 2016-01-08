@@ -33,7 +33,5 @@ unsuccessfulbuild
 # Directories/files
 Debug
 Release
-Test
-6-Drawing
 *.exe
 *.opendb
