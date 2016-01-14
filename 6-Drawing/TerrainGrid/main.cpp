@@ -268,11 +268,11 @@ void App::buildGeometryBuffers( void )
     GeometryGenerator geoGen;
 
     geoGen.createGrid( 160.f, 160.f, 50, 50, grid );
-    mGridIndexCount = static_cast<UINT>( grid.Indices.size() );
+    mGridIndexCount = static_cast<UINT>( grid.indices.size() );
 
-    std::vector<Vertex> vertices( grid.Vertices.size() );
-    for ( size_t i = 0; i < grid.Vertices.size(); ++i ) {
-        DirectX::XMFLOAT3 p = grid.Vertices[i].Position;
+    std::vector<Vertex> vertices( grid.vertices.size() );
+    for ( size_t i = 0; i < grid.vertices.size(); ++i ) {
+        DirectX::XMFLOAT3 p = grid.vertices[i].position;
 
         p.y = getHeight( p.x, p.z );
 
@@ -284,7 +284,7 @@ void App::buildGeometryBuffers( void )
     D3D11_BUFFER_DESC bd;
     ZeroMemory( &bd, sizeof( bd ) );
     bd.Usage = D3D11_USAGE_IMMUTABLE;
-    bd.ByteWidth = sizeof( Vertex ) * grid.Vertices.size();
+    bd.ByteWidth = sizeof( Vertex ) * grid.vertices.size();
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     bd.CPUAccessFlags = 0;
     bd.MiscFlags = 0;
@@ -304,7 +304,7 @@ void App::buildGeometryBuffers( void )
     ibd.MiscFlags = 0;
     ibd.StructureByteStride = 0;
     D3D11_SUBRESOURCE_DATA iinitData;
-    iinitData.pSysMem = &grid.Indices[0];
+    iinitData.pSysMem = &grid.indices[0];
     HR( mD3DDevice->CreateBuffer( &ibd, &iinitData, &mIB ) );
 }
 
