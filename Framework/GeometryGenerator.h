@@ -24,25 +24,25 @@ public:
 	{
 		Vertex(){}
 		Vertex(const DirectX::XMFLOAT3& p, const DirectX::XMFLOAT3& n, const DirectX::XMFLOAT3& t, const DirectX::XMFLOAT2& uv)
-			: Position(p), Normal(n), TangentU(t), TexC(uv){}
+			: position(p), normal(n), tangentU(t), texC(uv){}
 		Vertex(
 			float px, float py, float pz, 
 			float nx, float ny, float nz,
 			float tx, float ty, float tz,
 			float u, float v)
-			: Position(px,py,pz), Normal(nx,ny,nz),
-			  TangentU(tx, ty, tz), TexC(u,v){}
+			: position(px,py,pz), normal(nx,ny,nz),
+			  tangentU(tx, ty, tz), texC(u,v){}
 
-        DirectX::XMFLOAT3 Position;
-        DirectX::XMFLOAT3 Normal;
-        DirectX::XMFLOAT3 TangentU;
-        DirectX::XMFLOAT2 TexC;
+        DirectX::XMFLOAT3 position;
+        DirectX::XMFLOAT3 normal;
+        DirectX::XMFLOAT3 tangentU;
+        DirectX::XMFLOAT2 texC;
 	};
 
 	struct MeshData
 	{
-		std::vector<Vertex> Vertices;
-		std::vector<UINT> Indices;
+		std::vector<Vertex> vertices;
+		std::vector<UINT> indices;
 	};
 
 	///<summary>

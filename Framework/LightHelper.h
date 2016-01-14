@@ -33,8 +33,8 @@ struct PointLight
     DirectX::XMFLOAT4 Diffuse;
     DirectX::XMFLOAT4 Specular;
 
-	// Packed into 4D vector: (Position, Range)
-    DirectX::XMFLOAT3 Position;
+	// Packed into 4D vector: (position, Range)
+    DirectX::XMFLOAT3 position;
 	float Range;
 
 	// Packed into 4D vector: (A0, A1, A2, Pad)
@@ -50,8 +50,8 @@ struct SpotLight
     DirectX::XMFLOAT4 Diffuse;
     DirectX::XMFLOAT4 Specular;
 
-	// Packed into 4D vector: (Position, Range)
-    DirectX::XMFLOAT3 Position;
+	// Packed into 4D vector: (position, Range)
+    DirectX::XMFLOAT3 position;
 	float Range;
 
 	// Packed into 4D vector: (Direction, Spot)
