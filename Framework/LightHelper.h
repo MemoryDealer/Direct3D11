@@ -18,59 +18,59 @@ struct DirectionalLight
 {
 	DirectionalLight() { ZeroMemory(this, sizeof(this)); }
 
-	DirectX::XMFLOAT4 Ambient;
-    DirectX::XMFLOAT4 Diffuse;
-    DirectX::XMFLOAT4 Specular;
-    DirectX::XMFLOAT3 Direction;
-	float Pad; // Pad the last float so we can set an array of lights if we wanted.
+	DirectX::XMFLOAT4 ambient;
+    DirectX::XMFLOAT4 diffuse;
+    DirectX::XMFLOAT4 specular;
+    DirectX::XMFLOAT3 direction;
+	float pad; // Pad the last float so we can set an array of lights if we wanted.
 };
 
 struct PointLight
 {
 	PointLight() { ZeroMemory(this, sizeof(this)); }
 
-    DirectX::XMFLOAT4 Ambient;
-    DirectX::XMFLOAT4 Diffuse;
-    DirectX::XMFLOAT4 Specular;
+    DirectX::XMFLOAT4 ambient;
+    DirectX::XMFLOAT4 diffuse;
+    DirectX::XMFLOAT4 specular;
 
 	// Packed into 4D vector: (position, Range)
     DirectX::XMFLOAT3 position;
-	float Range;
+	float range;
 
 	// Packed into 4D vector: (A0, A1, A2, Pad)
-    DirectX::XMFLOAT3 Att;
-	float Pad; // Pad the last float so we can set an array of lights if we wanted.
+    DirectX::XMFLOAT3 att;
+	float pad; // Pad the last float so we can set an array of lights if we wanted.
 };
 
 struct SpotLight
 {
 	SpotLight() { ZeroMemory(this, sizeof(this)); }
 
-    DirectX::XMFLOAT4 Ambient;
-    DirectX::XMFLOAT4 Diffuse;
-    DirectX::XMFLOAT4 Specular;
+    DirectX::XMFLOAT4 ambient;
+    DirectX::XMFLOAT4 diffuse;
+    DirectX::XMFLOAT4 specular;
 
 	// Packed into 4D vector: (position, Range)
     DirectX::XMFLOAT3 position;
-	float Range;
+	float range;
 
 	// Packed into 4D vector: (Direction, Spot)
-    DirectX::XMFLOAT3 Direction;
-	float Spot;
+    DirectX::XMFLOAT3 direction;
+	float spot;
 
 	// Packed into 4D vector: (Att, Pad)
-    DirectX::XMFLOAT3 Att;
-	float Pad; // Pad the last float so we can set an array of lights if we wanted.
+    DirectX::XMFLOAT3 att;
+	float pad; // Pad the last float so we can set an array of lights if we wanted.
 };
 
 struct Material
 {
 	Material() { ZeroMemory(this, sizeof(this)); }
 
-    DirectX::XMFLOAT4 Ambient;
-    DirectX::XMFLOAT4 Diffuse;
-    DirectX::XMFLOAT4 Specular; // w = SpecPower
-    DirectX::XMFLOAT4 Reflect;
+    DirectX::XMFLOAT4 ambient;
+    DirectX::XMFLOAT4 diffuse;
+    DirectX::XMFLOAT4 specular; // w = SpecPower
+    DirectX::XMFLOAT4 reflect;
 };
 
 #endif // LIGHTHELPER_H

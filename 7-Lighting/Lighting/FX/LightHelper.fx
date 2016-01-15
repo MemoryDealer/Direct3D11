@@ -1,0 +1,184 @@
+// ================================================= //
+// LightHelper.fx
+// ================================================= //
+
+struct DirectionalLight {
+    float4 ambient;
+    float4 diffuse;
+    float4 specular;
+    float3 direction;
+    float pad;
+};
+
+struct PointLight {
+    float4 ambient;
+    float4 diffuse;
+    float4 specular;
+
+    float3 position;
+    float range;
+
+    float3 att;
+    float pad;
+};
+
+struct SpotLight {
+    float4 ambient;
+    float4 diffuse;
+    float4 specular;
+
+    float3 position;
+    float range;
+
+    float3 direction;
+    float spot;
+
+    float3 att;
+    float pad;
+};
+
+struct Material {
+    float4 ambient;
+    float4 diffuse;
+    float4 specular; // w = specPower
+    float4 reflect;
+};
+
+// ================================================= //
+
+void ComputeDirectionalLight( Material mat,
+                              DirectionalLight L,
+                              float3 normal,
+                              float3 toEye,
+                              out float4 ambient,
+                              out float4 diffuse,
+                              out float4 spec )
+{
+    // Init outputs.
+    ambient = float4( 0.f, 0.f, 0.f, 0.f );
+    diffuse = float4( 0.f, 0.f, 0.f, 0.f );
+    spec = float4( 0.f, 0.f, 0.f, 0.f );
+
+    // Light vector aims opposite the direction the light rays travel.
+    float3 lightVec = -L.direction;
+
+    // Apply ambient.
+    ambient = mat.ambient * L.ambient;
+
+    // Apply diffuse/spec, provided surface is in line of sight with light.
+    float diffuseFactor = dot( lightVec, normal );
+
+    // Flatten to avoid dynamic branching.
+    [flatten]
+    if ( diffuseFactor > 0.f ) {
+        // Get a reflection to calculate specular lighting.
+        float3 v = reflect( -lightVec, normal );
+        float specFactor = pow( max( dot( v, toEye ), 0.f ), mat.specular.w );
+
+        diffuse = diffuseFactor * mat.diffuse * L.diffuse;
+        spec = specFactor * mat.specular * L.specular;
+    }
+}
+
+// ================================================= //
+
+void ComputePointLight( Material mat,
+                        PointLight L,
+                        float3 pos,
+                        float3 normal,
+                        float3 toEye,
+                        out float4 ambient,
+                        out float4 diffuse,
+                        out float4 spec )
+{
+    // Init outputs.
+    ambient = float4( 0.f, 0.f, 0.f, 0.f );
+    diffuse = float4( 0.f, 0.f, 0.f, 0.f );
+    spec = float4( 0.f, 0.f, 0.f, 0.f );
+
+    // The vector from surface to the light.
+    float3 lightVec = L.position - pos;
+
+    // Distance from surface to light.
+    float d = length( lightVec );
+
+    // Range test.
+    if ( d > L.range )
+        return;
+
+    // Normalize light vector.
+    lightVec /= d;
+
+    // Apply ambient.
+    ambient = mat.ambient * L.ambient;
+
+    // Apply diffuse/spec.
+    float diffuseFactor = dot( lightVec, normal );
+
+    [flatten]
+    if ( diffuseFactor > 0.f ) {
+        float3 v = reflect( -lightVec, normal );
+        float specFactor = pow( max( dot( v, toEye ), 0.f ), mat.specular.w );
+
+        diffuse = diffuseFactor * mat.diffuse * L.diffuse;
+        spec = specFactor * mat.specular * L.specular;
+    }
+
+    //! Attenuate ( why dot???).
+    float att = 1.f / dot( L.att, float3( 1.f, d, d * d ) );
+
+    diffuse *= att;
+    spec *= att;
+}
+
+// ================================================= //
+
+void ComputeSpotLight( Material mat,
+                       SpotLight L,
+                       float3 pos,
+                       float3 normal,
+                       float3 toEye,
+                       out float4 ambient,
+                       out float4 diffuse,
+                       out float4 spec )
+{
+    // Init outputs.
+    ambient = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+    diffuse = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+    spec = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+
+    // Vector from surface to light.
+    float3 lightVec = L.position - pos;
+
+    float d = length( lightVec );
+
+    if ( d > L.range )
+        return;
+
+    lightVec /= d;
+
+    // Apply ambient.
+    ambient = mat.ambient * L.ambient;
+
+    // Apply diffuse/spec.
+    float diffuseFactor = dot( lightVec, normal );
+
+    [flatten]
+    if ( diffuseFactor > 0.f ) {
+        float3 v = reflect( -lightVec, normal );
+        float specFactor = pow ( max( dot( v, toEye ), 0.f ), mat.specular.w );
+
+        diffuse = diffuseFactor * mat.diffuse * L.diffuse;
+        spec = specFactor * mat.specular * L.specular;
+    }
+
+    // Scale by spotlight factor and attenuate.
+    float spot = pow( max( dot( -lightVec, L.direction ), 0.f ), L.spot );
+    float att = spot / dot( L.att, float3( 1.f, d, d * d ) );
+
+    ambient *= spot;
+    diffuse *= att;
+    spec *= att;
+}
+
+// ================================================= //
