@@ -71,8 +71,10 @@ void ComputeDirectionalLight( Material mat,
     // Flatten to avoid dynamic branching.
     [flatten]
     if ( diffuseFactor > 0.f ) {
-        // Get a reflection to calculate specular lighting.
+        // Get a reflection vector to calculate specular lighting.
         float3 v = reflect( -lightVec, normal );
+        // If the cosine of the angle between the reflection vector and the toEye vector is positive,
+        // a specular effect is generated, the intensity determine by the specular.w exponent.
         float specFactor = pow( max( dot( v, toEye ), 0.f ), mat.specular.w );
 
         diffuse = diffuseFactor * mat.diffuse * L.diffuse;
@@ -99,7 +101,7 @@ void ComputePointLight( Material mat,
     // The vector from surface to the light.
     float3 lightVec = L.position - pos;
 
-    // Distance from surface to light.
+    // Distance from surface point to light.
     float d = length( lightVec );
 
     // Range test.
@@ -124,8 +126,11 @@ void ComputePointLight( Material mat,
         spec = specFactor * mat.specular * L.specular;
     }
 
-    //! Attenuate ( why dot???).
+    // Attenuate. The light's attenuation value is a float3, so the attenuation
+    // parameters are controlled by changing its values.
+    // e.g., L.att of (0.f, 1.f, 0.f) calculates attenuation by inverse distance.
     float att = 1.f / dot( L.att, float3( 1.f, d, d * d ) );
+    //float att = saturate( dot( normal, L.position ) );
 
     diffuse *= att;
     spec *= att;

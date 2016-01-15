@@ -126,7 +126,7 @@ App::App( HINSTANCE hInstance )
     , mEyePosW( 0.f, 0.f, 0.f )
     , mTheta( 1.5f * MathHelper::Pi )
     , mPhi( 0.1f * MathHelper::Pi )
-    , mRadius( 200.0f )
+    , mRadius( 80.0f )
 {
     mMainWindowCaption = L"Waves Demo";
 
@@ -148,8 +148,9 @@ App::App( HINSTANCE hInstance )
     mDirLight.direction = XMFLOAT3( 0.57735f, -0.57735f, 0.57735f );
 
     // Point light--position is changed every frame to animate in UpdateScene function.
-    mPointLight.ambient = XMFLOAT4( 0.3f, 0.3f, 0.3f, 1.0f );
-    mPointLight.diffuse = XMFLOAT4( 0.7f, 0.7f, 0.7f, 1.0f );
+    //mPointLight.ambient = XMFLOAT4( 0.1f, 0.1f, 0.1f, 1.0f );
+    mPointLight.ambient = XMFLOAT4( 0.0f, 0.0f, 0.0f, 0.0f );
+    mPointLight.diffuse = XMFLOAT4( 0.5f, 0.9f, 0.5f, 1.0f );
     mPointLight.specular = XMFLOAT4( 0.7f, 0.7f, 0.7f, 1.0f );
     mPointLight.att = XMFLOAT3( 0.0f, 0.1f, 0.0f );
     mPointLight.range = 25.0f;
@@ -333,9 +334,6 @@ void App::drawScene( void )
 
         mTech->GetPassByIndex( 0 )->Apply( 0, mD3DImmediateContext );
         mD3DImmediateContext->DrawIndexed( 3 * mWaves.TriangleCount(), 0, 0 );
-
-        // Restore default.
-        mD3DImmediateContext->RSSetState( nullptr );
     }
 
     HR( mSwapChain->Present( 0, 0 ) );
@@ -446,13 +444,16 @@ void App::buildFX( void )
 
     if ( compilationMsgs != nullptr ) {
         // Filter out warning about deprecated compiler since effects are being used.
-        if ( std::string("warning X4717: Effects deprecated for D3DCompiler_47").compare( 
-            static_cast<const char*>( compilationMsgs->GetBufferPointer() ) ) == 0 ) {
-            MessageBoxA( 0,
+        /*if ( std::string("warning X4717: Effects deprecated for D3DCompiler_47").compare( 
+            0, 
+            std::string::npos, 
+            static_cast<const char*>( compilationMsgs->GetBufferPointer() ), 
+            strlen("warning X4717: Effects deprecated for D3DCompiler_47") + 1 ) >= 0 ) {*/
+            /*MessageBoxA( 0,
                          static_cast<char*>( compilationMsgs->GetBufferPointer() ),
                          nullptr,
-                         0 );
-        }
+                         0 );*/
+       // }
         ReleaseCOM( compilationMsgs );
     }
 

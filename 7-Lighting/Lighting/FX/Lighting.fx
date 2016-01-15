@@ -28,7 +28,7 @@ struct VertexIn {
 };
 
 struct VertexOut {
-    float4 PosH : SV_POSITION;
+    float4 PosH : SV_POSITION; // "System value" - denotes the vertex shader output element that holds the vertex position.
     float3 PosW : POSITION;
     float3 NormalW : NORMAL;
 };
@@ -40,7 +40,9 @@ VertexOut VS( VertexIn vin )
     VertexOut vout;
 
     // Transform to world space.
-    vout.PosW = mul( float4( vin.PosL, 1.f ), gWorld ).xyz; // <--- ???
+    vout.PosW = mul( float4( vin.PosL, 1.f ), gWorld ).xyz; // Only pull out xyz components for PosW since it's a float3.
+    // (See p.276) A non-uniform scaling factor distorts the normal, applying the inverse tranpose world matrix
+    // transforms the normal so it's orthogonal to its associated tangent vector.
     vout.NormalW = mul( vin.NormalL, ( float3x3 )gWorldInvTranspose );
 
     // Transform to homogeneous clip space.
@@ -51,7 +53,7 @@ VertexOut VS( VertexIn vin )
 
 // ================================================= //
 
-float4 PS( VertexOut pin ) : SV_Target
+float4 PS( VertexOut pin ) : SV_Target // SV_Target indicates the PS return value type should match the render target format.
 {
     // Interpolating normal (happens during rasterization) can unnormalize it, so normalize it.
     pin.NormalW = normalize( pin.NormalW );
