@@ -29,7 +29,7 @@ public:
 	const DirectX::XMFLOAT3& operator[](int i)const { return mCurrSolution[i]; }
 
 	// Returns the solution normal at the ith grid point.
-	const DirectX::XMFLOAT3& Normal(int i)const { return mNormals[i]; }
+	const DirectX::XMFLOAT3& normal(int i)const { return mNormals[i]; }
 
 	// Returns the unit tangent vector at the ith grid point in the local x-axis direction.
 	const DirectX::XMFLOAT3& TangentX(int i)const { return mTangentX[i]; }
