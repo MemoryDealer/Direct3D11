@@ -275,7 +275,7 @@ void App::updateScene( const float dt )
     Vertex* v = reinterpret_cast<Vertex*>( mappedData.pData );
     for ( UINT i = 0; i < mWaves.VertexCount(); ++i ) {
         v[i].pos = mWaves[i];
-        v[i].normal = mWaves.Normal( i );
+        v[i].normal = mWaves.normal( i );
     }
 
     mD3DImmediateContext->Unmap( mWavesVB, 0 );
