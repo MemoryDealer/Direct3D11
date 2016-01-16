@@ -71,10 +71,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(D3D11_FRAMEWORK);$(IncludePath)</IncludePath>
     <LibraryPath>$(D3D11_FRAMEWORK)\lib;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>E:\DirectXDeprecated\Utilities\bin\x64;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(D3D11_FRAMEWORK);$(IncludePath)</IncludePath>
     <LibraryPath>$(D3D11_FRAMEWORK)\lib;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>E:\DirectXDeprecated\Utilities\bin\x64;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(D3D11_FRAMEWORK);$(IncludePath)</IncludePath>
@@ -141,29 +143,51 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Framework\Camera.cpp" />
-    <ClCompile Include="..\Framework\D3DApp.cpp" />
-    <ClCompile Include="..\Framework\dxerr.cpp" />
-    <ClCompile Include="..\Framework\GameTimer.cpp" />
-    <ClCompile Include="..\Framework\GeometryGenerator.cpp" />
-    <ClCompile Include="..\Framework\LightHelper.cpp" />
-    <ClCompile Include="..\Framework\MathHelper.cpp" />
-    <ClCompile Include="..\Framework\TextureMgr.cpp" />
-    <ClCompile Include="..\Framework\Waves.cpp" />
+    <ClCompile Include="..\..\Framework\Camera.cpp" />
+    <ClCompile Include="..\..\Framework\D3DApp.cpp" />
+    <ClCompile Include="..\..\Framework\dxerr.cpp" />
+    <ClCompile Include="..\..\Framework\Effects.cpp" />
+    <ClCompile Include="..\..\Framework\GameTimer.cpp" />
+    <ClCompile Include="..\..\Framework\GeometryGenerator.cpp" />
+    <ClCompile Include="..\..\Framework\LightHelper.cpp" />
+    <ClCompile Include="..\..\Framework\MathHelper.cpp" />
+    <ClCompile Include="..\..\Framework\TextureMgr.cpp" />
+    <ClCompile Include="..\..\Framework\Vertex.cpp" />
+    <ClCompile Include="..\..\Framework\Waves.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Framework\Camera.h" />
-    <ClInclude Include="..\Framework\D3DApp.h" />
-    <ClInclude Include="..\Framework\D3DUtil.h" />
-    <ClInclude Include="..\Framework\d3dx11effect.h" />
-    <ClInclude Include="..\Framework\dxerr.h" />
-    <ClInclude Include="..\Framework\GameTimer.h" />
-    <ClInclude Include="..\Framework\GeometryGenerator.h" />
-    <ClInclude Include="..\Framework\LightHelper.h" />
-    <ClInclude Include="..\Framework\MathHelper.h" />
-    <ClInclude Include="..\Framework\TextureMgr.h" />
-    <ClInclude Include="..\Framework\Waves.h" />
+    <ClInclude Include="..\..\Framework\Camera.h" />
+    <ClInclude Include="..\..\Framework\D3DApp.h" />
+    <ClInclude Include="..\..\Framework\D3DUtil.h" />
+    <ClInclude Include="..\..\Framework\d3dx11effect.h" />
+    <ClInclude Include="..\..\Framework\dxerr.h" />
+    <ClInclude Include="..\..\Framework\Effects.h" />
+    <ClInclude Include="..\..\Framework\GameTimer.h" />
+    <ClInclude Include="..\..\Framework\GeometryGenerator.h" />
+    <ClInclude Include="..\..\Framework\LightHelper.h" />
+    <ClInclude Include="..\..\Framework\MathHelper.h" />
+    <ClInclude Include="..\..\Framework\TextureMgr.h" />
+    <ClInclude Include="..\..\Framework\Vertex.h" />
+    <ClInclude Include="..\..\Framework\Waves.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="FX\Basic.fx">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">FX\%(Filename).fxo</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">FX\%(Filename).fxo</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="FX\LightHelper.fx">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">FX\%(Filename).fxo</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">FX\%(Filename).fxo</ObjectFileOutput>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
