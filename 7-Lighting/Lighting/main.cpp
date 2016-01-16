@@ -148,12 +148,30 @@ App::App( HINSTANCE hInstance )
     mDirLight.direction = XMFLOAT3( 0.57735f, -0.57735f, 0.57735f );
 
     // Point light--position is changed every frame to animate in UpdateScene function.
+
+    // Good values:
+        /*
+        3250, 1.0, 0.0014, 0.000007
+        600, 1.0, 0.007, 0.0002
+        325, 1.0, 0.014, 0.0007
+        200, 1.0, 0.022, 0.0019
+        160, 1.0, 0.027, 0.0028
+        100, 1.0, 0.045, 0.0075
+        65, 1.0, 0.07, 0.017
+        50, 1.0, 0.09, 0.032
+        32, 1.0, 0.14, 0.07
+        20, 1.0, 0.22, 0.20
+        13, 1.0, 0.35, 0.44
+        7, 1.0, 0.7, 1.8
+        */
+    // Shortcut: L->setAttenuation( Range, 1.0f, 4.5/Range, 75.0f/(Range*Range) );
+
     //mPointLight.ambient = XMFLOAT4( 0.1f, 0.1f, 0.1f, 1.0f );
     mPointLight.ambient = XMFLOAT4( 0.0f, 0.0f, 0.0f, 0.0f );
-    mPointLight.diffuse = XMFLOAT4( 0.5f, 0.9f, 0.5f, 1.0f );
-    mPointLight.specular = XMFLOAT4( 0.7f, 0.7f, 0.7f, 1.0f );
-    mPointLight.att = XMFLOAT3( 0.0f, 0.1f, 0.0f );
-    mPointLight.range = 25.0f;
+    mPointLight.diffuse = XMFLOAT4( 0.f, 0.5f, 1.f, 1.0f );
+    mPointLight.specular = XMFLOAT4( 1.f, 1.f, 1.f, 1.0f );
+    mPointLight.att = XMFLOAT3( 1.0f, 0.022f, 0.0019f );
+    mPointLight.range = 200.0f;
 
     // Spot light--position and direction changed every frame to animate in UpdateScene function.
     mSpotLight.ambient = XMFLOAT4( 0.0f, 0.0f, 0.0f, 1.0f );

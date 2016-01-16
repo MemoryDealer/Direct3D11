@@ -129,8 +129,7 @@ void ComputePointLight( Material mat,
     // Attenuate. The light's attenuation value is a float3, so the attenuation
     // parameters are controlled by changing its values.
     // e.g., L.att of (0.f, 1.f, 0.f) calculates attenuation by inverse distance.
-    float att = 1.f / dot( L.att, float3( 1.f, d, d * d ) );
-    //float att = saturate( dot( normal, L.position ) );
+    float att = 1.f / dot( L.att, float3( 1.f, d, d * d ) );    
 
     diffuse *= att;
     spec *= att;
