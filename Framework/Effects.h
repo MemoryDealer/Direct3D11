@@ -50,7 +50,7 @@ public:
         WorldInvTranspose->SetMatrix( reinterpret_cast<const float*>( &M ) ); 
     }
 
-    void SetTexTransform( CXMMATRIX M )
+    void SetTexTransform( DirectX::CXMMATRIX M )
     {
         TexTransform->SetMatrix( reinterpret_cast<const float*>( &M ) );
     }

@@ -383,6 +383,14 @@ bool D3DApp::initMainWindow( void )
         return false;
     }
 
+#if !defined ( __NO_CONSOLE__ )
+    AllocConsole();
+    FILE* pCout = nullptr;
+    freopen_s( &pCout, "CONOUT$", "w", stdout );
+    freopen_s( &pCout, "CONOUT$", "w", stderr );
+    fclose( pCout );
+#endif
+
     ShowWindow( mMainWindow, SW_SHOW );
     UpdateWindow( mMainWindow );
 

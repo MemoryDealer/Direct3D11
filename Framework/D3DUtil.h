@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -40,6 +41,7 @@
 HRESULT hr = ( x );\
 if( FAILED( hr ) ){\
 std::cout << "Fatal error: " << __FILE__ << ", line " << __LINE__;\
+DXTrace( __FILEW__, static_cast<DWORD>( __LINE__ ), hr, L"Unknown", true );\
 }\
 }
 #endif

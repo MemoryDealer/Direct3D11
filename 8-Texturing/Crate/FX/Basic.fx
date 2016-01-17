@@ -102,32 +102,35 @@ float4 PS( VertexOut pin, uniform int gLightCount, uniform bool gUseTexture ) : 
 
     //
     // Lighting
+    float4 pixel = texColor;
+    if ( gLightCount > 0 ) {
+        // Begin with zero.
+        float4 ambient = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+        float4 diffuse = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+        float4 spec = float4( 0.0f, 0.0f, 0.0f, 0.0f );
 
-    // Begin with zero.
-    float4 ambient = float4( 0.0f, 0.0f, 0.0f, 0.0f );
-    float4 diffuse = float4( 0.0f, 0.0f, 0.0f, 0.0f );
-    float4 spec = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+        // Sum the light contribution from each light source.
+        [unroll]
+        for ( int i = 0; i < gLightCount; ++i ) {
+            float4 A, D, S;
+            ComputeDirectionalLight( gMaterial,
+                                     gDirLights[i],
+                                     pin.NormalW,
+                                     toEye,
+                                     A,
+                                     D,
+                                     S );
+            ambient += A;
+            diffuse += D;
+            spec += S;
+        }
 
-    // Sum the light contribution from each light source.
-    [unroll]
-    for ( int i = 0; i < gLightCount; ++i ) {
-        float4 A, D, S;
-        ComputeDirectionalLight( gMaterial,
-                                 gDirLights[i],
-                                 pin.NormalW,
-                                 toEye,
-                                 A,
-                                 D,
-                                 S );
-        ambient += A;
-        diffuse += D;
-        spec += S;
-    }
+        // Modulate with late add.
+        pixel = texColor * ( ambient + diffuse ) + spec;
+    }    
 
-    float4 pixel = ambient + diffuse + spec;
-
-    // Common to take alpha from diffuse material.
-    pixel.a = gMaterial.diffuse.a;
+    // Common to take alpha from diffuse material and texture.
+    pixel.a = gMaterial.diffuse.a * texColor.a;
 
     return pixel;
 }
