@@ -19,6 +19,8 @@
 #include <DirectXMath.h>
 #include <DxErr.h>
 
+#include <DirectXTex/DirectXTex.h>
+
 #include <cassert>
 #include <ctime>
 #include <algorithm>

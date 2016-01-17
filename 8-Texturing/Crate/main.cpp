@@ -34,8 +34,7 @@ public:
 
 private:
 
-    void buildShapeBuffers( void );
-    void buildSkullBuffers( void );
+    void buildGeometryBuffers( void );
 
 private:
 
@@ -145,8 +144,9 @@ bool App::init( void )
     Effects::InitAll( mD3DDevice );
     InputLayouts::InitAll( mD3DDevice );
 
-    buildShapeBuffers();
-    buildSkullBuffers();
+    //HR (D3DX11CreateShader)
+
+    buildGeometryBuffers();
 
     return true;
 }
