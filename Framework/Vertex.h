@@ -16,6 +16,14 @@ namespace Vertex
 		DirectX::XMFLOAT3 pos;
         DirectX::XMFLOAT3 normal;
         DirectX::XMFLOAT2 tex;
+
+        Basic32() : pos( 0.0f, 0.0f, 0.0f ), normal( 0.0f, 0.0f, 0.0f ), tex( 0.0f, 0.0f ) { }
+        Basic32( const DirectX::XMFLOAT3& p, const DirectX::XMFLOAT3& n, const DirectX::XMFLOAT2& uv )
+            : pos( p ), normal( n ), tex( uv )
+        {}
+        Basic32( float px, float py, float pz, float nx, float ny, float nz, float u, float v )
+            : pos( px, py, pz ), normal( nx, ny, nz ), tex( u, v )
+        {}
 	};
 }
 
