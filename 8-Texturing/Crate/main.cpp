@@ -147,7 +147,7 @@ bool App::init( void )
     //HR (D3DX11CreateShader)
     TexMetadata data;
     std::unique_ptr<ScratchImage> image( new ScratchImage() );
-    HR( LoadFromDDSFile( L"Textures/WoodCrate02.dds",
+    HR( LoadFromDDSFile( L"Textures/WoodCrate01.dds",
                          DDS_FLAGS_NONE,
                          &data,
                          *image ) );
@@ -194,6 +194,11 @@ void App::updateScene( const float dt )
 
     DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH( pos, target, up );
     XMStoreFloat4x4( &mView, V );    
+
+    /*static XMFLOAT2 offset { 0.f, 0.f };
+    offset.x += 0.05f * dt;
+    offset.y += 0.1f * dt;
+    XMStoreFloat4x4( &mTexTransform, XMMatrixTranslation( offset.x, offset.y, 0.f ) );*/
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //

@@ -49,8 +49,8 @@ D3DApp::D3DApp( HINSTANCE hInstance )
 , mViewport( )
 , mMainWindowCaption( L"D3D11 App" )
 , mD3DDriverType( D3D_DRIVER_TYPE_HARDWARE )
-, mClientWidth( 800 )
-, mClientHeight( 600 )
+, mClientWidth( 1024 )
+, mClientHeight( 768 )
 , mEnable4xMsaa( false )
 {
     ZeroMemory( &mViewport, sizeof( D3D11_VIEWPORT ) );
@@ -94,7 +94,7 @@ HWND D3DApp::getMainWindow( void ) const
 
 float D3DApp::getAspectRatio( void ) const
 {
-    return static_cast<float>( mClientWidth / mClientHeight );
+    return static_cast<float>(mClientWidth) / static_cast<float>( mClientHeight );
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
