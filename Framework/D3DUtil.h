@@ -15,11 +15,13 @@
 
 #include <D3D11.h>
 #include <DXGI.h>
+#include <dxgiformat.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <DxErr.h>
-
+#include <d3dx11effect.h>
 #include <DirectXTex/DirectXTex.h>
+#include <DirectXTex/DDSTextureLoader/DDSTextureLoader.h>
 
 #include <cassert>
 #include <ctime>
@@ -56,6 +58,31 @@ DXTrace( __FILEW__, static_cast<DWORD>( __LINE__ ), hr, L"Unknown", true );\
 
 #define ReleaseCOM( x ) { if( x ){ x->Release(); x = nullptr; } }
 #define SafeDelete( x ) { delete x; x = nullptr; }
+
+// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
+
+class TextHelper {
+public:
+
+    template<typename T>
+    static inline std::wstring ToString( const T& s )
+    {
+        std::wostringstream oss;
+        oss << s;
+
+        return oss.str();
+    }
+
+    template<typename T>
+    static inline T FromString( const std::wstring& s )
+    {
+        T x;
+        std::wistringstream iss( s );
+        iss >> x;
+
+        return x;
+    }
+};
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 

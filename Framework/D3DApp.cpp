@@ -291,6 +291,17 @@ LRESULT D3DApp::msgProc( HWND hwnd,
         }
         return 0;
 
+    case WM_KEYDOWN:
+        switch ( LOWORD( wParam ) ) {
+        default:
+            break;
+
+        case VK_ESCAPE:
+            PostQuitMessage( 0 );
+            break;
+        }
+        return 0;
+
         // User grabs resize bar.
     case WM_ENTERSIZEMOVE:
         mPaused = true;
