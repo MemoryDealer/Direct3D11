@@ -101,20 +101,40 @@ TreeSpriteEffect::~TreeSpriteEffect()
 }
 #pragma endregion
 
+#pragma region BlurEffect
+BlurEffect::BlurEffect( ID3D11Device* device, const std::wstring& filename )
+    : Effect( device, filename )
+{
+    HorzBlurTech = mFX->GetTechniqueByName( "HorzBlur" );
+    VertBlurTech = mFX->GetTechniqueByName( "VertBlur" );
+
+    Weights = mFX->GetVariableByName( "gWeights" )->AsScalar();
+    InputMap = mFX->GetVariableByName( "gInput" )->AsShaderResource();
+    OutputMap = mFX->GetVariableByName( "gOutput" )->AsUnorderedAccessView();
+}
+
+BlurEffect::~BlurEffect()
+{
+}
+#pragma endregion
+
 #pragma region Effects
 
 BasicEffect* Effects::BasicFX = nullptr;
 TreeSpriteEffect* Effects::TreeSpriteFX = nullptr;
+BlurEffect* Effects::BlurFX = nullptr;
 
 void Effects::InitAll(ID3D11Device* device)
 {
 	BasicFX = new BasicEffect(device, L"FX/Basic.fxo");
-    TreeSpriteFX = new TreeSpriteEffect( device, L"FX/TreeSprite.fxo" );
+    //TreeSpriteFX = new TreeSpriteEffect( device, L"FX/TreeSprite.fxo" );
+    BlurFX = new BlurEffect( device, L"FX/Blur.fxo" );
 }
 
 void Effects::DestroyAll()
 {
 	SafeDelete( BasicFX );
     SafeDelete( TreeSpriteFX );
+    SafeDelete( BlurFX );
 }
 #pragma endregion

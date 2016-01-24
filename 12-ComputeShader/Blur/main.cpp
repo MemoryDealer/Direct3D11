@@ -3,6 +3,8 @@
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
 #include "D3DApp.h"
+
+#include "BlurFilter.h"
 #include "d3dx11Effect.h"
 #include "Effects.h"
 #include "GeometryGenerator.h"
@@ -44,13 +46,16 @@ public:
 
 private:
 
-    float GetHillHeight( float x, float z )const;
-    XMFLOAT3 GetHillNormal( float x, float z )const;
+    void UpdateWaves();
+    void DrawWrapper();
+    void DrawScreenQuad();
+    float GetHillHeight( float x, float z ) const;
+    XMFLOAT3 GetHillNormal( float x, float z ) const;
     void BuildLandGeometryBuffers();
     void BuildWaveGeometryBuffers();
     void BuildCrateGeometryBuffers();
-    void BuildTreeSpritesBuffer();
-    void DrawTreeSprites( CXMMATRIX viewProj );
+    void BuildScreenQuadGeometryBuffers();
+    void BuildOffscreenViews();
 
 private:
 
@@ -63,20 +68,24 @@ private:
     ID3D11Buffer* mBoxVB;
     ID3D11Buffer* mBoxIB;
 
-    ID3D11Buffer* mTreeSpritesVB;
+    ID3D11Buffer* mScreenQuadVB;
+    ID3D11Buffer* mScreenQuadIB;
 
     ID3D11ShaderResourceView* mGrassMapSRV;
     ID3D11ShaderResourceView* mWavesMapSRV;
-    ID3D11ShaderResourceView* mBoxMapSRV;
-    ID3D11ShaderResourceView* mTreeTextureMapArraySRV;
+    ID3D11ShaderResourceView* mCrateSRV;
 
+    ID3D11ShaderResourceView* mOffscreenSRV;
+    ID3D11UnorderedAccessView* mOffscreenUAV;
+    ID3D11RenderTargetView* mOffscreenRTV;
+
+    BlurFilter mBlur;
     Waves mWaves;
 
     DirectionalLight mDirLights[3];
     Material mLandMat;
     Material mWavesMat;
     Material mBoxMat;
-    Material mTreeMat;
 
     XMFLOAT4X4 mGrassTexTransform;
     XMFLOAT4X4 mWaterTexTransform;
@@ -88,18 +97,19 @@ private:
     XMFLOAT4X4 mProj;
 
     UINT mLandIndexCount;
+    UINT mWaveIndexCount;
 
     XMFLOAT2 mWaterTexOffset;
 
-    static const UINT TreeCount = 16;
-
-    bool mAlphaToCoverageOn;    
-
     RenderOptions mRenderOptions;
+
+    int mBlurStrength;
 
     XMFLOAT3 mEyePosW;
 
-    float mTheta, mPhi, mRadius;
+    float mTheta;
+    float mPhi;
+    float mRadius;
 
     POINT mLastMousePos;
 
@@ -126,13 +136,14 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE prevInstance,
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
 App::App( HINSTANCE hInstance )
-    : D3DApp( hInstance ), mLandVB( 0 ), mLandIB( 0 ), mWavesVB( 0 ), mWavesIB( 0 ), mBoxVB( 0 ), mBoxIB( 0 ), mTreeSpritesVB( 0 ),
-    mGrassMapSRV( 0 ), mWavesMapSRV( 0 ), mBoxMapSRV( 0 ), mAlphaToCoverageOn( true ),
-    mWaterTexOffset( 0.0f, 0.0f ), mEyePosW( 0.0f, 0.0f, 0.0f ), mLandIndexCount( 0 ), mRenderOptions( RenderOptions::TexturesAndFog ),
-    mTheta( 1.3f*MathHelper::Pi ), mPhi( 0.4f*MathHelper::Pi ), mRadius( 80.0f )
+    : D3DApp( hInstance ), mLandVB( 0 ), mLandIB( 0 ), mWavesVB( 0 ), mWavesIB( 0 ),
+    mBoxVB( 0 ), mBoxIB( 0 ), mScreenQuadVB( 0 ), mScreenQuadIB( 0 ),
+    mGrassMapSRV( 0 ), mWavesMapSRV( 0 ), mCrateSRV( 0 ), mOffscreenSRV( 0 ), mOffscreenUAV( 0 ), mOffscreenRTV( 0 ),
+    mWaterTexOffset( 0.0f, 0.0f ), mEyePosW( 0.0f, 0.0f, 0.0f ), mLandIndexCount( 0 ), mWaveIndexCount( 0 ),
+    mRenderOptions( RenderOptions::TexturesAndFog ),
+    mTheta( 1.3f*MathHelper::Pi ), mPhi( 0.4f*MathHelper::Pi ), mRadius( 80.0f ), mBlurStrength( 8 )
 {
-    mMainWindowCaption = L"Blending Demo";
-    mEnable4xMsaa = true;
+    mMainWindowCaption = L"Blur Demo";
 
     ZeroMemory( &mLastMousePos, sizeof( POINT ) );
 
@@ -175,10 +186,6 @@ App::App( HINSTANCE hInstance )
     mBoxMat.ambient = XMFLOAT4( 0.5f, 0.5f, 0.5f, 1.0f );
     mBoxMat.diffuse = XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
     mBoxMat.specular = XMFLOAT4( 0.4f, 0.4f, 0.4f, 16.0f );
-
-    mTreeMat.ambient = XMFLOAT4( 0.5f, 0.5f, 0.5f, 1.0f );
-    mTreeMat.diffuse = XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
-    mTreeMat.specular = XMFLOAT4( 0.2f, 0.2f, 0.2f, 16.0f );
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
@@ -186,17 +193,23 @@ App::App( HINSTANCE hInstance )
 App::~App( void )
 {
     mD3DImmediateContext->ClearState();
+    
     ReleaseCOM( mLandVB );
     ReleaseCOM( mLandIB );
     ReleaseCOM( mWavesVB );
     ReleaseCOM( mWavesIB );
     ReleaseCOM( mBoxVB );
     ReleaseCOM( mBoxIB );
-    ReleaseCOM( mTreeSpritesVB );
+    ReleaseCOM( mScreenQuadVB );
+    ReleaseCOM( mScreenQuadIB );
+
     ReleaseCOM( mGrassMapSRV );
     ReleaseCOM( mWavesMapSRV );
-    ReleaseCOM( mBoxMapSRV );
-    ReleaseCOM( mTreeTextureMapArraySRV );
+    ReleaseCOM( mCrateSRV );
+
+    ReleaseCOM( mOffscreenSRV );
+    ReleaseCOM( mOffscreenUAV );
+    ReleaseCOM( mOffscreenRTV );
 
     Effects::DestroyAll();
     InputLayouts::DestroyAll();
@@ -209,9 +222,7 @@ bool App::init( void )
 {
     if ( !D3DApp::init() ) {
         return false;
-    }
-
-    mWaves.Init( 160, 160, 1.f, 0.03f, 5.f, 0.3f );
+    }    
 
     Effects::InitAll( mD3DDevice );
     InputLayouts::InitAll( mD3DDevice );
@@ -250,98 +261,15 @@ bool App::init( void )
                                   image->GetImages(),
                                   image->GetImageCount(),
                                   data,
-                                  &mBoxMapSRV ) );
+                                  &mCrateSRV ) );
 
-    std::vector<std::wstring> trees;
-    trees.push_back( L"Textures/tree0.dds" );
-    trees.push_back( L"Textures/tree1.dds" );
-    trees.push_back( L"Textures/tree2.dds" );
-    trees.push_back( L"Textures/tree3.dds" );    
-
-    std::vector<ID3D11Texture2D*> textures;
-    textures.resize( trees.size() );
-    for ( auto& i : trees ) {     
-        static int j = 0;
-
-        HR( CreateDDSTextureFromFileEx( mD3DDevice,
-                                        i.c_str(),
-                                        0,
-                                        D3D11_USAGE_STAGING,
-                                        0,
-                                        D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ,
-                                        0,
-                                        0,
-                                        reinterpret_cast<ID3D11Resource**>( &textures[j++] ),
-                                        nullptr ) );
-
-
-    }
-
-    // Create texture array.
-    D3D11_TEXTURE2D_DESC desc;
-    textures[0]->GetDesc( &desc );
-
-    D3D11_TEXTURE2D_DESC arrayDesc;
-    arrayDesc.Width = desc.Width;
-    arrayDesc.Height = desc.Height;
-    arrayDesc.MipLevels = desc.MipLevels;
-    arrayDesc.ArraySize = textures.size();
-    arrayDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    arrayDesc.SampleDesc.Count = 1;
-    arrayDesc.SampleDesc.Quality = 0;
-    arrayDesc.Usage = D3D11_USAGE_DEFAULT;
-    arrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    arrayDesc.CPUAccessFlags = 0;
-    arrayDesc.MiscFlags = 0;
-
-    ID3D11Texture2D* texArray = nullptr;
-    HR( mD3DDevice->CreateTexture2D( &arrayDesc, 0, &texArray ) );
-
-    // Copy individual texture elements into array.
-    for ( UINT texElement = 0; texElement < textures.size(); ++texElement ) {
-        for ( UINT mipLevel = 0; mipLevel < desc.MipLevels; ++mipLevel ) {
-            D3D11_MAPPED_SUBRESOURCE mappedTex2D;
-            HR( mD3DImmediateContext->Map( textures[texElement], 
-                                           mipLevel,
-                                           D3D11_MAP_READ,
-                                           0,
-                                           &mappedTex2D ) );
-
-            mD3DImmediateContext->UpdateSubresource( texArray,
-                                                     D3D11CalcSubresource( mipLevel,
-                                                                           texElement,
-                                                                           desc.MipLevels ),
-                                                     0,
-                                                     mappedTex2D.pData,
-                                                     mappedTex2D.RowPitch,
-                                                     mappedTex2D.DepthPitch );
-            mD3DImmediateContext->Unmap( textures[texElement], mipLevel );
-        }
-    }
-
-    // Create resource view to texture array.
-    D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
-    viewDesc.Format = arrayDesc.Format;
-    viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-    viewDesc.Texture2DArray.MostDetailedMip = 0;
-    viewDesc.Texture2DArray.MipLevels = arrayDesc.MipLevels;
-    viewDesc.Texture2DArray.FirstArraySlice = 0;
-    viewDesc.Texture2DArray.ArraySize = textures.size();
-
-    HR( mD3DDevice->CreateShaderResourceView( texArray,
-                                              &viewDesc,
-                                              &mTreeTextureMapArraySRV ) );
-
-    // Cleanup textures.
-    ReleaseCOM( texArray );
-    for ( auto& i : textures ) {
-        ReleaseCOM( i );
-    }
+    mWaves.Init( 160, 160, 1.f, 0.03f, 5.f, 0.3f );
 
     BuildLandGeometryBuffers();
     BuildWaveGeometryBuffers();
     BuildCrateGeometryBuffers();
-    BuildTreeSpritesBuffer();
+    BuildScreenQuadGeometryBuffers();
+    BuildOffscreenViews();
 
     return true;
 }
@@ -351,6 +279,10 @@ bool App::init( void )
 void App::onResize( void )
 {
     D3DApp::onResize();
+
+    // Recreate the resources that depend on the client area size.
+    BuildOffscreenViews();
+    mBlur.Init( mD3DDevice, mClientWidth, mClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM );
 
     // Update the aspect ratio and recompute the projection matrix.
     XMMATRIX P = XMMatrixPerspectiveFovLH( 0.25f * MathHelper::Pi,
@@ -383,6 +315,7 @@ void App::updateScene( const float dt )
     // Every quarter second, generate a random wave.
     //
     static float t_base = 0.0f;
+    static bool blurUp = true;
     if ( ( mTimer.totalTime() - t_base ) >= 0.1f )
     {
         t_base += 0.1f;
@@ -393,6 +326,20 @@ void App::updateScene( const float dt )
         float r = MathHelper::RandF( 0.5f, 1.0f );
 
         mWaves.Disturb( i, j, r );
+
+
+        if ( blurUp ) {
+            mBlurStrength += 8;
+            if ( mBlurStrength > 64 ) {
+                blurUp = false;
+            }
+        }
+        else {
+            mBlurStrength -= 8;
+            if ( mBlurStrength < 8 ) {
+                blurUp = true;
+            }
+        }
     }
 
     mWaves.Update( dt );
@@ -433,39 +380,58 @@ void App::updateScene( const float dt )
 
     if ( GetAsyncKeyState( '3' ) & 0x8000 )
         mRenderOptions = RenderOptions::TexturesAndFog;
-
-    if ( GetAsyncKeyState( 'R' ) & 0x8000 )
-        mAlphaToCoverageOn = true;
-
-    if ( GetAsyncKeyState( 'T' ) & 0x8000 )
-        mAlphaToCoverageOn = false;
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
 void App::drawScene( void )
 {
-    mD3DImmediateContext->ClearRenderTargetView( mRenderTargetView,
+    // Render to offscreen buffer.
+    ID3D11RenderTargetView* renderTargets[1] = { mOffscreenRTV };
+    mD3DImmediateContext->OMSetRenderTargets( 1, renderTargets, mDepthStencilView );
+
+    mD3DImmediateContext->ClearRenderTargetView( mOffscreenRTV,
                                                  reinterpret_cast<const float*>( &Colors::Silver ) );
     mD3DImmediateContext->ClearDepthStencilView( mDepthStencilView,
                                                  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
                                                  1.f,
                                                  0 );
 
-    const UINT stride = sizeof( Vertex::Basic32 );
-    const UINT offset = 0;
+    // Draw scene to offscreen buffer.
+    DrawWrapper();
 
-    // Set constant buffers.
-    XMMATRIX view = XMLoadFloat4x4( &mView );
-    XMMATRIX proj = XMLoadFloat4x4( &mProj );
-    XMMATRIX viewProj = view * proj;
+    // Restore back buffer. The offscreen render target will serve as input to compute
+    // shader for blurring, so we must unbind it from the OM stage before we can use
+    // it as an input into the compute shader.
+    renderTargets[0] = mRenderTargetView;
+    mD3DImmediateContext->OMSetRenderTargets( 1, renderTargets, mDepthStencilView );
 
-    DrawTreeSprites( viewProj );
+    // Blur offscreen buffer.
+    mBlur.BlurInPlace( mD3DImmediateContext, mOffscreenSRV, mOffscreenUAV, mBlurStrength );
 
+    mD3DImmediateContext->ClearRenderTargetView( mRenderTargetView, reinterpret_cast<const float*>( &Colors::Silver ) );
+    mD3DImmediateContext->ClearDepthStencilView( mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0 );
+
+    DrawScreenQuad();
+
+    HR( mSwapChain->Present( 0, 0 ) );
+}
+
+// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
+
+void App::DrawWrapper( void )
+{
     mD3DImmediateContext->IASetInputLayout( InputLayouts::Basic32 );
     mD3DImmediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-    float blendFactor [] = { 0.f, 0.f, 0.f, 0.f };    
+    float blendFactor [] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+    UINT stride = sizeof( Vertex::Basic32 );
+    UINT offset = 0;
+
+    XMMATRIX view = XMLoadFloat4x4( &mView );
+    XMMATRIX proj = XMLoadFloat4x4( &mProj );
+    XMMATRIX viewProj = view*proj;
 
     // Set per frame constants.
     Effects::BasicFX->SetDirLights( mDirLights );
@@ -474,8 +440,8 @@ void App::drawScene( void )
     Effects::BasicFX->SetFogStart( 15.0f );
     Effects::BasicFX->SetFogRange( 175.0f );
 
-    ID3DX11EffectTechnique* boxTech = Effects::BasicFX->Light1Tech;
-    ID3DX11EffectTechnique* landAndWavesTech = Effects::BasicFX->Light1Tech;
+    ID3DX11EffectTechnique* boxTech = Effects::BasicFX->Light3Tech;
+    ID3DX11EffectTechnique* landAndWavesTech = Effects::BasicFX->Light3Tech;
 
     switch ( mRenderOptions )
     {
@@ -494,8 +460,12 @@ void App::drawScene( void )
     }
 
     D3DX11_TECHNIQUE_DESC techDesc;
+
+    //
+    // Draw the box with alpha clipping.
+    // 
+
     boxTech->GetDesc( &techDesc );
-    
     for ( UINT p = 0; p < techDesc.Passes; ++p )
     {
         mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mBoxVB, &stride, &offset );
@@ -511,7 +481,7 @@ void App::drawScene( void )
         Effects::BasicFX->SetWorldViewProj( worldViewProj );
         Effects::BasicFX->SetTexTransform( XMMatrixIdentity() );
         Effects::BasicFX->SetMaterial( mBoxMat );
-        Effects::BasicFX->SetDiffuseMap( mBoxMapSRV );
+        Effects::BasicFX->SetDiffuseMap( mCrateSRV );
 
         mD3DImmediateContext->RSSetState( RenderStates::NoCullRS );
         boxTech->GetPassByIndex( p )->Apply( 0, mD3DImmediateContext );
@@ -520,6 +490,10 @@ void App::drawScene( void )
         // Restore default render state.
         mD3DImmediateContext->RSSetState( 0 );
     }
+
+    //
+    // Draw the hills and water with texture and fog (no alpha clipping needed).
+    //
 
     landAndWavesTech->GetDesc( &techDesc );
     for ( UINT p = 0; p < techDesc.Passes; ++p )
@@ -568,10 +542,40 @@ void App::drawScene( void )
         mD3DImmediateContext->DrawIndexed( 3 * mWaves.TriangleCount(), 0, 0 );
 
         // Restore default blend state
-        mD3DImmediateContext->OMSetBlendState( nullptr, blendFactor, 0xffffffff );
+        mD3DImmediateContext->OMSetBlendState( 0, blendFactor, 0xffffffff );
     }
+}
 
-    HR( mSwapChain->Present( 0, 0 ) );
+// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
+
+void App::DrawScreenQuad()
+{
+    mD3DImmediateContext->IASetInputLayout( InputLayouts::Basic32 );
+    mD3DImmediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+
+    UINT stride = sizeof( Vertex::Basic32 );
+    UINT offset = 0;
+
+    XMMATRIX identity = XMMatrixIdentity();
+
+    ID3DX11EffectTechnique* texOnlyTech = Effects::BasicFX->Light0TexTech;
+    D3DX11_TECHNIQUE_DESC techDesc;
+
+    texOnlyTech->GetDesc( &techDesc );
+    for ( UINT p = 0; p < techDesc.Passes; ++p )
+    {
+        mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mScreenQuadVB, &stride, &offset );
+        mD3DImmediateContext->IASetIndexBuffer( mScreenQuadIB, DXGI_FORMAT_R32_UINT, 0 );
+
+        Effects::BasicFX->SetWorld( identity );
+        Effects::BasicFX->SetWorldInvTranspose( identity );
+        Effects::BasicFX->SetWorldViewProj( identity );
+        Effects::BasicFX->SetTexTransform( identity );
+        Effects::BasicFX->SetDiffuseMap( mBlur.GetBlurredOutput() );
+
+        texOnlyTech->GetPassByIndex( p )->Apply( 0, mD3DImmediateContext );
+        mD3DImmediateContext->DrawIndexed( 6, 0, 0 );
+    }
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
@@ -631,8 +635,6 @@ float App::GetHillHeight( float x, float z )const
     return 0.3f*( z*sinf( 0.1f*x ) + x*cosf( 0.1f*z ) );
 }
 
-// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
-
 XMFLOAT3 App::GetHillNormal( float x, float z )const
 {
     // n = (-df/dx, 1, -df/dz)
@@ -646,8 +648,6 @@ XMFLOAT3 App::GetHillNormal( float x, float z )const
 
     return n;
 }
-
-// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
 void App::BuildLandGeometryBuffers()
 {
@@ -701,8 +701,6 @@ void App::BuildLandGeometryBuffers()
     HR( mD3DDevice->CreateBuffer( &ibd, &iinitData, &mLandIB ) );
 }
 
-// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
-
 void App::BuildWaveGeometryBuffers()
 {
     // Create the vertex buffer.  Note that we allocate space only, as
@@ -753,8 +751,6 @@ void App::BuildWaveGeometryBuffers()
     HR( mD3DDevice->CreateBuffer( &ibd, &iinitData, &mWavesIB ) );
 }
 
-// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
-
 void App::BuildCrateGeometryBuffers()
 {
     GeometryGenerator::MeshData box;
@@ -803,86 +799,87 @@ void App::BuildCrateGeometryBuffers()
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void App::BuildTreeSpritesBuffer()
+void App::BuildScreenQuadGeometryBuffers( void )
 {
-    Vertex::TreePointSprite v[TreeCount];
+    GeometryGenerator::MeshData quad;
 
-    for ( UINT i = 0; i < TreeCount; ++i )
+    GeometryGenerator geoGen;
+    geoGen.createFullscreenQuad( quad );
+
+    //
+    // Extract the vertex elements we are interested in and pack the
+    // vertices of all the meshes into one vertex buffer.
+    //
+
+    std::vector<Vertex::Basic32> vertices( quad.vertices.size() );
+
+    for ( UINT i = 0; i < quad.vertices.size(); ++i )
     {
-        float x = MathHelper::RandF( -35.0f, 35.0f );
-        float z = MathHelper::RandF( -35.0f, 35.0f );
-        float y = GetHillHeight( x, z );
-
-        // Move tree slightly above land height.
-        y += 10.0f;
-
-        v[i].pos = XMFLOAT3( x, y, z );
-        v[i].size = XMFLOAT2( 24.0f, 24.0f );
+        vertices[i].pos = quad.vertices[i].position;
+        vertices[i].normal = quad.vertices[i].normal;
+        vertices[i].tex = quad.vertices[i].texC;
     }
 
     D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof( Vertex::TreePointSprite ) * TreeCount;
+    vbd.ByteWidth = sizeof( Vertex::Basic32 ) * quad.vertices.size();
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vbd.CPUAccessFlags = 0;
     vbd.MiscFlags = 0;
     D3D11_SUBRESOURCE_DATA vinitData;
-    vinitData.pSysMem = v;
-    HR( mD3DDevice->CreateBuffer( &vbd, &vinitData, &mTreeSpritesVB ) );
+    vinitData.pSysMem = &vertices[0];
+    HR( mD3DDevice->CreateBuffer( &vbd, &vinitData, &mScreenQuadVB ) );
+
+    //
+    // Pack the indices of all the meshes into one index buffer.
+    //
+
+    D3D11_BUFFER_DESC ibd;
+    ibd.Usage = D3D11_USAGE_IMMUTABLE;
+    ibd.ByteWidth = sizeof( UINT ) * quad.indices.size();
+    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    ibd.CPUAccessFlags = 0;
+    ibd.MiscFlags = 0;
+    D3D11_SUBRESOURCE_DATA iinitData;
+    iinitData.pSysMem = &quad.indices[0];
+    HR( mD3DDevice->CreateBuffer( &ibd, &iinitData, &mScreenQuadIB ) );
 }
 
-void App::DrawTreeSprites( CXMMATRIX viewProj )
+// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
+
+void App::BuildOffscreenViews( void )
 {
-    Effects::TreeSpriteFX->SetDirLights( mDirLights );
-    Effects::TreeSpriteFX->SetEyePosW( mEyePosW );
-    Effects::TreeSpriteFX->SetFogColor( Colors::Silver );
-    Effects::TreeSpriteFX->SetFogStart( 15.0f );
-    Effects::TreeSpriteFX->SetFogRange( 175.0f );
-    Effects::TreeSpriteFX->SetViewProj( viewProj );
-    Effects::TreeSpriteFX->SetMaterial( mTreeMat );
-    Effects::TreeSpriteFX->SetTreeTextureMapArray( mTreeTextureMapArraySRV );
+    // We call this function everytime the window is resized so that the render target is a quarter
+    // the client area dimensions.  So Release the previous views before we create new ones.
+    ReleaseCOM( mOffscreenSRV );
+    ReleaseCOM( mOffscreenRTV );
+    ReleaseCOM( mOffscreenUAV );
 
-    mD3DImmediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_POINTLIST );
-    mD3DImmediateContext->IASetInputLayout( InputLayouts::TreePointSprite );
-    UINT stride = sizeof( Vertex::TreePointSprite );
-    UINT offset = 0;
+    D3D11_TEXTURE2D_DESC texDesc;
 
-    ID3DX11EffectTechnique* tech = Effects::TreeSpriteFX->Light3Tech;
-    switch ( mRenderOptions )
-    {
-    case RenderOptions::Lighting:
-        tech = Effects::TreeSpriteFX->Light3Tech;
-        break;
-    case RenderOptions::Textures:
-        tech = Effects::TreeSpriteFX->Light3TexAlphaClipTech;
-        break;
-    case RenderOptions::TexturesAndFog:
-        tech = Effects::TreeSpriteFX->Light3TexAlphaClipFogTech;
-        break;
-    }
+    texDesc.Width = mClientWidth;
+    texDesc.Height = mClientHeight;
+    texDesc.MipLevels = 1;
+    texDesc.ArraySize = 1;
+    texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    texDesc.SampleDesc.Count = 1;
+    texDesc.SampleDesc.Quality = 0;
+    texDesc.Usage = D3D11_USAGE_DEFAULT;
+    texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+    texDesc.CPUAccessFlags = 0;
+    texDesc.MiscFlags = 0;
 
-    D3DX11_TECHNIQUE_DESC desc;
-    tech->GetDesc( &desc );
-    for ( UINT p = 0; p < desc.Passes; ++p ) {
-        mD3DImmediateContext->IASetVertexBuffers( 0,
-                                                  1,
-                                                  &mTreeSpritesVB,
-                                                  &stride,
-                                                  &offset );
+    ID3D11Texture2D* offscreenTex = 0;
+    HR( mD3DDevice->CreateTexture2D( &texDesc, 0, &offscreenTex ) );
 
-        float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
+    // Null description means to create a view to all mipmap levels using 
+    // the format the texture was created with.
+    HR( mD3DDevice->CreateShaderResourceView( offscreenTex, 0, &mOffscreenSRV ) );
+    HR( mD3DDevice->CreateRenderTargetView( offscreenTex, 0, &mOffscreenRTV ) );
+    HR( mD3DDevice->CreateUnorderedAccessView( offscreenTex, 0, &mOffscreenUAV ) );
 
-        if ( mAlphaToCoverageOn ) {
-            mD3DImmediateContext->OMSetBlendState( RenderStates::AlphaToCoverageBS,
-                                                   blendFactor,
-                                                   0xffffffff );
-        }
-
-        tech->GetPassByIndex( 0 )->Apply( 0, mD3DImmediateContext );
-        mD3DImmediateContext->Draw( TreeCount, 0 );
-
-        mD3DImmediateContext->OMSetBlendState( nullptr, blendFactor, 0xffffffff );
-    }
+    // View saves a reference to the texture so we can release our reference.
+    ReleaseCOM( offscreenTex );
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //

@@ -39,9 +39,9 @@ void InputLayouts::InitAll(ID3D11Device* device)
     //
     // TreePointSprite
 
-    Effects::TreeSpriteFX->Light3Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    /*Effects::TreeSpriteFX->Light3Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
     HR( device->CreateInputLayout( InputLayoutDesc::TreePointSprite, 2, passDesc.pIAInputSignature,
-                                   passDesc.IAInputSignatureSize, &TreePointSprite ) );
+                                   passDesc.IAInputSignatureSize, &TreePointSprite ) );*/
 }
 
 void InputLayouts::DestroyAll()
