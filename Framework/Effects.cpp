@@ -118,17 +118,43 @@ BlurEffect::~BlurEffect()
 }
 #pragma endregion
 
+#pragma region BezierTessellationEffect
+BezierTessellationEffect::BezierTessellationEffect( ID3D11Device* device, const std::wstring& filename )
+    : Effect( device, filename )
+{
+    TessTech = mFX->GetTechniqueByName( "Tess" );
+
+    WorldViewProj = mFX->GetVariableByName( "gWorldViewProj" )->AsMatrix();
+    World = mFX->GetVariableByName( "gWorld" )->AsMatrix();
+    WorldInvTranspose = mFX->GetVariableByName( "gWorldInvTranspose" )->AsMatrix();
+    TexTransform = mFX->GetVariableByName( "gTexTransform" )->AsMatrix();
+    EyePosW = mFX->GetVariableByName( "gEyePosW" )->AsVector();
+    FogColor = mFX->GetVariableByName( "gFogColor" )->AsVector();
+    FogStart = mFX->GetVariableByName( "gFogStart" )->AsScalar();
+    FogRange = mFX->GetVariableByName( "gFogRange" )->AsScalar();
+    DirLights = mFX->GetVariableByName( "gDirLights" );
+    Mat = mFX->GetVariableByName( "gMaterial" );
+    DiffuseMap = mFX->GetVariableByName( "gDiffuseMap" )->AsShaderResource();
+}
+
+BezierTessellationEffect::~BezierTessellationEffect()
+{
+}
+#pragma endregion
+
 #pragma region Effects
 
 BasicEffect* Effects::BasicFX = nullptr;
 TreeSpriteEffect* Effects::TreeSpriteFX = nullptr;
 BlurEffect* Effects::BlurFX = nullptr;
+BezierTessellationEffect* Effects::BezierTessellationFX = nullptr;
 
 void Effects::InitAll(ID3D11Device* device)
 {
 	BasicFX = new BasicEffect(device, L"FX/Basic.fxo");
     //TreeSpriteFX = new TreeSpriteEffect( device, L"FX/TreeSprite.fxo" );
     BlurFX = new BlurEffect( device, L"FX/Blur.fxo" );
+    BezierTessellationFX = new BezierTessellationEffect( device, L"FX/BezierTessellation.fxo" );
 }
 
 void Effects::DestroyAll()
@@ -136,5 +162,6 @@ void Effects::DestroyAll()
 	SafeDelete( BasicFX );
     SafeDelete( TreeSpriteFX );
     SafeDelete( BlurFX );
+    SafeDelete( BezierTessellationFX );
 }
 #pragma endregion
