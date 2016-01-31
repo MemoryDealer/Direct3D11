@@ -153,8 +153,8 @@ void Effects::InitAll(ID3D11Device* device)
 {
 	BasicFX = new BasicEffect(device, L"FX/Basic.fxo");
     //TreeSpriteFX = new TreeSpriteEffect( device, L"FX/TreeSprite.fxo" );
-    BlurFX = new BlurEffect( device, L"FX/Blur.fxo" );
-    BezierTessellationFX = new BezierTessellationEffect( device, L"FX/BezierTessellation.fxo" );
+    //BlurFX = new BlurEffect( device, L"FX/Blur.fxo" );
+    //BezierTessellationFX = new BezierTessellationEffect( device, L"FX/BezierTessellation.fxo" );
 }
 
 void Effects::DestroyAll()

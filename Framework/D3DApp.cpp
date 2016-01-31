@@ -297,6 +297,7 @@ LRESULT D3DApp::msgProc( HWND hwnd,
             break;
 
         case VK_ESCAPE:
+        case VK_END:
             PostQuitMessage( 0 );
             break;
         }
