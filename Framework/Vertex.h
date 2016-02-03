@@ -45,6 +45,7 @@ public:
 	static const D3D11_INPUT_ELEMENT_DESC Basic32[3];
     static const D3D11_INPUT_ELEMENT_DESC Pos[1];
     static const D3D11_INPUT_ELEMENT_DESC TreePointSprite[2];
+    static const D3D11_INPUT_ELEMENT_DESC InstancedBasic32[8];
 };
 
 class InputLayouts
@@ -56,6 +57,7 @@ public:
 	static ID3D11InputLayout* Basic32;
     static ID3D11InputLayout* Pos;
     static ID3D11InputLayout* TreePointSprite;
+    static ID3D11InputLayout* InstancedBasic32;
 };
 
 #endif // VERTEX_H
