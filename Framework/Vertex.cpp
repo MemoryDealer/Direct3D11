@@ -66,9 +66,9 @@ void InputLayouts::InitAll(ID3D11Device* device)
     HR( device->CreateInputLayout( InputLayoutDesc::TreePointSprite, 2, passDesc.pIAInputSignature,
                                    passDesc.IAInputSignatureSize, &TreePointSprite ) );*/
 
-    Effects::InstancedBasicFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    /*Effects::InstancedBasicFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
     HR( device->CreateInputLayout( InputLayoutDesc::InstancedBasic32, 8, passDesc.pIAInputSignature,
-                                   passDesc.IAInputSignatureSize, &InstancedBasic32 ) );
+                                   passDesc.IAInputSignatureSize, &InstancedBasic32 ) );*/
 }
 
 void InputLayouts::DestroyAll()

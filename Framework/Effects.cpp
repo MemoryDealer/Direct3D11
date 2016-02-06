@@ -206,7 +206,7 @@ void Effects::InitAll(ID3D11Device* device)
     //TreeSpriteFX = new TreeSpriteEffect( device, L"FX/TreeSprite.fxo" );
     //BlurFX = new BlurEffect( device, L"FX/Blur.fxo" );
     //BezierTessellationFX = new BezierTessellationEffect( device, L"FX/BezierTessellation.fxo" );
-    InstancedBasicFX = new InstancedBasicEffect( device, L"FX/InstancedBasic.fxo" );
+    //InstancedBasicFX = new InstancedBasicEffect( device, L"FX/InstancedBasic.fxo" );
 }
 
 void Effects::DestroyAll()
