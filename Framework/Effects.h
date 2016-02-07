@@ -90,6 +90,11 @@ public:
         DiffuseMap->SetResource( tex );
     }
 
+    void SetCubeMap( ID3D11ShaderResourceView* tex )
+    {
+        CubeMap->SetResource( tex );
+    }
+
 	ID3DX11EffectTechnique* Light1Tech;
 	ID3DX11EffectTechnique* Light2Tech;
 	ID3DX11EffectTechnique* Light3Tech;
@@ -118,6 +123,34 @@ public:
     ID3DX11EffectTechnique* Light2TexAlphaClipFogTech;
     ID3DX11EffectTechnique* Light3TexAlphaClipFogTech;
 
+    ID3DX11EffectTechnique* Light1ReflectTech;
+    ID3DX11EffectTechnique* Light2ReflectTech;
+    ID3DX11EffectTechnique* Light3ReflectTech;
+
+    ID3DX11EffectTechnique* Light0TexReflectTech;
+    ID3DX11EffectTechnique* Light1TexReflectTech;
+    ID3DX11EffectTechnique* Light2TexReflectTech;
+    ID3DX11EffectTechnique* Light3TexReflectTech;
+
+    ID3DX11EffectTechnique* Light0TexAlphaClipReflectTech;
+    ID3DX11EffectTechnique* Light1TexAlphaClipReflectTech;
+    ID3DX11EffectTechnique* Light2TexAlphaClipReflectTech;
+    ID3DX11EffectTechnique* Light3TexAlphaClipReflectTech;
+
+    ID3DX11EffectTechnique* Light1FogReflectTech;
+    ID3DX11EffectTechnique* Light2FogReflectTech;
+    ID3DX11EffectTechnique* Light3FogReflectTech;
+
+    ID3DX11EffectTechnique* Light0TexFogReflectTech;
+    ID3DX11EffectTechnique* Light1TexFogReflectTech;
+    ID3DX11EffectTechnique* Light2TexFogReflectTech;
+    ID3DX11EffectTechnique* Light3TexFogReflectTech;
+
+    ID3DX11EffectTechnique* Light0TexAlphaClipFogReflectTech;
+    ID3DX11EffectTechnique* Light1TexAlphaClipFogReflectTech;
+    ID3DX11EffectTechnique* Light2TexAlphaClipFogReflectTech;
+    ID3DX11EffectTechnique* Light3TexAlphaClipFogReflectTech;
+
 	ID3DX11EffectMatrixVariable* WorldViewProj;
 	ID3DX11EffectMatrixVariable* World;
 	ID3DX11EffectMatrixVariable* WorldInvTranspose;
@@ -130,6 +163,7 @@ public:
 	ID3DX11EffectVariable* Mat;
 
     ID3DX11EffectShaderResourceVariable* DiffuseMap;
+    ID3DX11EffectShaderResourceVariable* CubeMap;
 };
 #pragma endregion
 
@@ -279,6 +313,23 @@ public:
 };
 #pragma endregion
 
+#pragma region SkyEffect
+class SkyEffect : public Effect {
+public:
+    SkyEffect( ID3D11Device* device, const std::wstring& filename );
+    ~SkyEffect();
+
+    void SetWorldViewProj( DirectX::CXMMATRIX M ) { WorldViewProj->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+    void SetCubeMap( ID3D11ShaderResourceView* cubemap ) { CubeMap->SetResource( cubemap ); }
+
+    ID3DX11EffectTechnique* SkyTech;
+
+    ID3DX11EffectMatrixVariable* WorldViewProj;
+
+    ID3DX11EffectShaderResourceVariable* CubeMap;
+};
+#pragma endregion
+
 #pragma region Effects
 class Effects
 {
@@ -291,6 +342,7 @@ public:
     static BlurEffect* BlurFX;
     static BezierTessellationEffect* BezierTessellationFX;
     static InstancedBasicEffect* InstancedBasicFX;
+    static SkyEffect* SkyFX;
 };
 #pragma endregion
 
