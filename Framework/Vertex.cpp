@@ -47,13 +47,21 @@ ID3D11InputLayout* InputLayouts::InstancedBasic32 = nullptr;
 void InputLayouts::InitAll(ID3D11Device* device)
 {
 	//
-	// PosNormal
+	// Basic32
 	//
 
 	D3DX11_PASS_DESC passDesc;
 	Effects::BasicFX->Light1Tech->GetPassByIndex(0)->GetDesc(&passDesc);
 	HR(device->CreateInputLayout(InputLayoutDesc::Basic32, 3, passDesc.pIAInputSignature, 
 		passDesc.IAInputSignatureSize, &Basic32));
+
+    //
+    // Pos
+    //
+
+    Effects::SkyFX->SkyTech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    HR( device->CreateInputLayout( InputLayoutDesc::Pos, 1, passDesc.pIAInputSignature,
+                                   passDesc.IAInputSignatureSize, &Pos ) );
 
    /* Effects::BezierTessellationFX->TessTech->GetPassByIndex( 0 )->GetDesc( &passDesc );
     HR( device->CreateInputLayout( InputLayoutDesc::Pos, 1, passDesc.pIAInputSignature,
