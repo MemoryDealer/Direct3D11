@@ -431,31 +431,7 @@ void App::drawScene( const Camera& camera, bool drawCenterSphere )
 
     XMMATRIX world;
     XMMATRIX worldInvTranspose;
-    XMMATRIX worldViewProj;
-
-    //
-    // Draw the skull.
-    //
-    D3DX11_TECHNIQUE_DESC techDesc;
-    activeSkullTech->GetDesc( &techDesc );
-    for ( UINT p = 0; p < techDesc.Passes; ++p )
-    {
-        mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mSkullVB, &stride, &offset );
-        mD3DImmediateContext->IASetIndexBuffer( mSkullIB, DXGI_FORMAT_R32_UINT, 0 );
-
-        world = XMLoadFloat4x4( &mSkullWorld );
-        worldInvTranspose = MathHelper::InverseTranspose( world );
-        worldViewProj = world*view*proj;
-
-        Effects::BasicFX->SetWorld( world );
-        Effects::BasicFX->SetWorldInvTranspose( worldInvTranspose );
-        Effects::BasicFX->SetWorldViewProj( worldViewProj );
-        Effects::BasicFX->SetTexTransform( XMMatrixIdentity() );
-        Effects::BasicFX->SetMaterial( mSkullMat );
-
-        activeSkullTech->GetPassByIndex( p )->Apply( 0, mD3DImmediateContext );
-        mD3DImmediateContext->DrawIndexed( mSkullIndexCount, 0, 0 );
-    }
+    XMMATRIX worldViewProj;   
 
     mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mShapesVB, &stride, &offset );
     mD3DImmediateContext->IASetIndexBuffer( mShapesIB, DXGI_FORMAT_R32_UINT, 0 );
@@ -463,7 +439,7 @@ void App::drawScene( const Camera& camera, bool drawCenterSphere )
     //
     // Draw the grid, cylinders, spheres and box without any cubemap reflection.
     // 
-
+    D3DX11_TECHNIQUE_DESC techDesc;
     activeTexTech->GetDesc( &techDesc );
     for ( UINT p = 0; p < techDesc.Passes; ++p )
     {
@@ -539,10 +515,36 @@ void App::drawScene( const Camera& camera, bool drawCenterSphere )
     }
 
     //
+    // Draw the skull.
+    //    
+    activeRTech->GetDesc( &techDesc );
+    for ( UINT p = 0; p < techDesc.Passes; ++p )
+    {
+        mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mSkullVB, &stride, &offset );
+        mD3DImmediateContext->IASetIndexBuffer( mSkullIB, DXGI_FORMAT_R32_UINT, 0 );
+
+        world = XMLoadFloat4x4( &mSkullWorld );
+        worldInvTranspose = MathHelper::InverseTranspose( world );
+        worldViewProj = world*view*proj;
+
+        Effects::BasicFX->SetWorld( world );
+        Effects::BasicFX->SetWorldInvTranspose( worldInvTranspose );
+        Effects::BasicFX->SetWorldViewProj( worldViewProj );
+        Effects::BasicFX->SetTexTransform( XMMatrixIdentity() );
+        Effects::BasicFX->SetMaterial( mSkullMat );
+
+        activeRTech->GetPassByIndex( p )->Apply( 0, mD3DImmediateContext );
+        mD3DImmediateContext->DrawIndexed( mSkullIndexCount, 0, 0 );
+    }
+
+    //
     // Draw the center sphere with the dynamic cube map.
     //
     if ( drawCenterSphere )
     {
+        mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mShapesVB, &stride, &offset );
+        mD3DImmediateContext->IASetIndexBuffer( mShapesIB, DXGI_FORMAT_R32_UINT, 0 );
+
         activeReflectTech->GetDesc( &techDesc );
         for ( UINT p = 0; p < techDesc.Passes; ++p )
         {
