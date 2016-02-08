@@ -36,6 +36,13 @@ namespace Vertex
         DirectX::XMFLOAT3 pos;
         DirectX::XMFLOAT2 size;
     };
+
+    struct PosNormalTexTan {
+        DirectX::XMFLOAT3 pos;
+        DirectX::XMFLOAT3 normal;
+        DirectX::XMFLOAT2 tex;
+        DirectX::XMFLOAT3 tangentU;
+    };
 }
 
 class InputLayoutDesc
@@ -46,6 +53,7 @@ public:
     static const D3D11_INPUT_ELEMENT_DESC Pos[1];
     static const D3D11_INPUT_ELEMENT_DESC TreePointSprite[2];
     static const D3D11_INPUT_ELEMENT_DESC InstancedBasic32[8];
+    static const D3D11_INPUT_ELEMENT_DESC PosNormalTexTan[4];
 };
 
 class InputLayouts
@@ -58,6 +66,7 @@ public:
     static ID3D11InputLayout* Pos;
     static ID3D11InputLayout* TreePointSprite;
     static ID3D11InputLayout* InstancedBasic32;
+    static ID3D11InputLayout* PosNormalTexTan;
 };
 
 #endif // VERTEX_H
