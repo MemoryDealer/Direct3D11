@@ -359,6 +359,16 @@ void App::drawScene( void )
     Effects::NormalMapFX->SetEyePosW( mCam.GetPosition() );
     Effects::NormalMapFX->SetCubeMap( mSky->CubeMapSRV() );
 
+    Effects::DisplacementMapFX->SetDirLights( mDirLights );
+    Effects::DisplacementMapFX->SetEyePosW( mCam.GetPosition() );
+    Effects::DisplacementMapFX->SetCubeMap( mSky->CubeMapSRV() );
+
+    Effects::DisplacementMapFX->SetHeightScale( 0.04f );
+    Effects::DisplacementMapFX->SetMaxTessDistance( 0.f );
+    Effects::DisplacementMapFX->SetMinTessDistance( 25.0f );
+    Effects::DisplacementMapFX->SetMinTessFactor( 1.0f );
+    Effects::DisplacementMapFX->SetMaxTessFactor( 5.0f );
+
     // Figure out which technique to use for different geometry.
 
     ID3DX11EffectTechnique* tech = Effects::NormalMapFX->Light3TexTech;

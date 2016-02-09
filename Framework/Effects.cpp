@@ -424,7 +424,7 @@ void Effects::InitAll(ID3D11Device* device)
     //InstancedBasicFX = new InstancedBasicEffect( device, L"FX/InstancedBasic.fxo" );
     SkyFX = new SkyEffect( device, L"FX/Sky.fxo" );
     NormalMapFX = new NormalMapEffect( device, L"FX/NormalMap.fxo" );
-    //DisplacementMapFX = new DisplacementMapEffect( device, L"FX/Displacement.fxo" );
+    DisplacementMapFX = new DisplacementMapEffect( device, L"FX/DisplacementMap.fxo" );
 }
 
 void Effects::DestroyAll()

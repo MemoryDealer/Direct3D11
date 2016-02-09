@@ -124,5 +124,8 @@
     <FxCompile Include="FX\NormalMap.fx">
       <Filter>FX</Filter>
     </FxCompile>
+    <FxCompile Include="FX\DisplacementMap.fx">
+      <Filter>FX</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
