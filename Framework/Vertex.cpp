@@ -43,6 +43,13 @@ const D3D11_INPUT_ELEMENT_DESC InputLayoutDesc::PosNormalTexTan[4] =
     { "TANGENT",  0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 
+const D3D11_INPUT_ELEMENT_DESC InputLayoutDesc::Terrain[3] =
+{
+    { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+};
+
 #pragma endregion
 
 #pragma region InputLayouts
@@ -52,6 +59,7 @@ ID3D11InputLayout* InputLayouts::Pos = nullptr;
 ID3D11InputLayout* InputLayouts::TreePointSprite = nullptr;
 ID3D11InputLayout* InputLayouts::InstancedBasic32 = nullptr;
 ID3D11InputLayout* InputLayouts::PosNormalTexTan = nullptr;
+ID3D11InputLayout* InputLayouts::Terrain = nullptr;
 
 void InputLayouts::InitAll(ID3D11Device* device)
 {
@@ -91,9 +99,16 @@ void InputLayouts::InitAll(ID3D11Device* device)
     // NormalMap
     //
 
-    Effects::NormalMapFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    /*Effects::NormalMapFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
     HR( device->CreateInputLayout( InputLayoutDesc::PosNormalTexTan, 4, passDesc.pIAInputSignature,
-                                   passDesc.IAInputSignatureSize, &PosNormalTexTan ) );
+                                   passDesc.IAInputSignatureSize, &PosNormalTexTan ) );*/
+
+    //
+    // Terrain
+
+    Effects::TerrainFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    HR( device->CreateInputLayout( InputLayoutDesc::Terrain, 3, passDesc.pIAInputSignature,
+                                   passDesc.IAInputSignatureSize, &Terrain ) );
 }
 
 void InputLayouts::DestroyAll()
@@ -103,6 +118,7 @@ void InputLayouts::DestroyAll()
     ReleaseCOM( TreePointSprite );
     ReleaseCOM( InstancedBasic32 );
     ReleaseCOM( PosNormalTexTan );
+    ReleaseCOM( Terrain );
 }
 
 #pragma endregion
