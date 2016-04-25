@@ -95,6 +95,9 @@ public:
         CubeMap->SetResource( tex );
     }
 
+    void SetShadowMap( ID3D11ShaderResourceView* tex ) { ShadowMap->SetResource( tex ); }
+    void SetShadowTransform( DirectX::CXMMATRIX M ) { ShadowTransform->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+
 	ID3DX11EffectTechnique* Light1Tech;
 	ID3DX11EffectTechnique* Light2Tech;
 	ID3DX11EffectTechnique* Light3Tech;
@@ -155,6 +158,7 @@ public:
 	ID3DX11EffectMatrixVariable* World;
 	ID3DX11EffectMatrixVariable* WorldInvTranspose;
     ID3DX11EffectMatrixVariable* TexTransform;
+    ID3DX11EffectMatrixVariable* ShadowTransform;
 	ID3DX11EffectVectorVariable* EyePosW;
     ID3DX11EffectVectorVariable* FogColor;
     ID3DX11EffectScalarVariable* FogStart;
@@ -164,6 +168,7 @@ public:
 
     ID3DX11EffectShaderResourceVariable* DiffuseMap;
     ID3DX11EffectShaderResourceVariable* CubeMap;
+    ID3DX11EffectShaderResourceVariable* ShadowMap;
 };
 #pragma endregion
 
@@ -340,6 +345,7 @@ public:
     void SetWorld( DirectX::CXMMATRIX M ) { World->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
     void SetWorldInvTranspose( DirectX::CXMMATRIX M ) { WorldInvTranspose->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
     void SetTexTransform( DirectX::CXMMATRIX M ) { TexTransform->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+    void SetShadowTransform( DirectX::CXMMATRIX M ) { ShadowTransform->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
     void SetEyePosW( const DirectX::XMFLOAT3& v ) { EyePosW->SetRawValue( &v, 0, sizeof( DirectX::XMFLOAT3 ) ); }
     void SetFogColor( const DirectX::FXMVECTOR v ) { FogColor->SetFloatVector( reinterpret_cast<const float*>( &v ) ); }
     void SetFogStart( float f ) { FogStart->SetFloat( f ); }
@@ -349,6 +355,7 @@ public:
     void SetDiffuseMap( ID3D11ShaderResourceView* tex ) { DiffuseMap->SetResource( tex ); }
     void SetCubeMap( ID3D11ShaderResourceView* tex ) { CubeMap->SetResource( tex ); }
     void SetNormalMap( ID3D11ShaderResourceView* tex ) { NormalMap->SetResource( tex ); }
+    void SetShadowMap( ID3D11ShaderResourceView* tex ) { ShadowMap->SetResource( tex ); }
 
     ID3DX11EffectTechnique* Light1Tech;
     ID3DX11EffectTechnique* Light2Tech;
@@ -410,6 +417,7 @@ public:
     ID3DX11EffectMatrixVariable* World;
     ID3DX11EffectMatrixVariable* WorldInvTranspose;
     ID3DX11EffectMatrixVariable* TexTransform;
+    ID3DX11EffectMatrixVariable* ShadowTransform;
     ID3DX11EffectVectorVariable* EyePosW;
     ID3DX11EffectVectorVariable* FogColor;
     ID3DX11EffectScalarVariable* FogStart;
@@ -420,6 +428,7 @@ public:
     ID3DX11EffectShaderResourceVariable* DiffuseMap;
     ID3DX11EffectShaderResourceVariable* CubeMap;
     ID3DX11EffectShaderResourceVariable* NormalMap;
+    ID3DX11EffectShaderResourceVariable* ShadowMap;
 };
 #pragma endregion
 
@@ -434,6 +443,7 @@ public:
     void SetWorld( DirectX::CXMMATRIX M ) { World->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
     void SetWorldInvTranspose( DirectX::CXMMATRIX M ) { WorldInvTranspose->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
     void SetTexTransform( DirectX::CXMMATRIX M ) { TexTransform->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+    void SetShadowTransform( DirectX::CXMMATRIX M ) { ShadowTransform->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
     void SetEyePosW( const DirectX::XMFLOAT3& v ) { EyePosW->SetRawValue( &v, 0, sizeof( DirectX::XMFLOAT3 ) ); }
     void SetFogColor( const DirectX::FXMVECTOR v ) { FogColor->SetFloatVector( reinterpret_cast<const float*>( &v ) ); }
     void SetFogStart( float f ) { FogStart->SetFloat( f ); }
@@ -449,6 +459,7 @@ public:
     void SetDiffuseMap( ID3D11ShaderResourceView* tex ) { DiffuseMap->SetResource( tex ); }
     void SetCubeMap( ID3D11ShaderResourceView* tex ) { CubeMap->SetResource( tex ); }
     void SetNormalMap( ID3D11ShaderResourceView* tex ) { NormalMap->SetResource( tex ); }
+    void SetShadowMap( ID3D11ShaderResourceView* tex ) { ShadowMap->SetResource( tex ); }
 
     ID3DX11EffectTechnique* Light1Tech;
     ID3DX11EffectTechnique* Light2Tech;
@@ -511,6 +522,7 @@ public:
     ID3DX11EffectMatrixVariable* World;
     ID3DX11EffectMatrixVariable* WorldInvTranspose;
     ID3DX11EffectMatrixVariable* TexTransform;
+    ID3DX11EffectMatrixVariable* ShadowTransform;
     ID3DX11EffectVectorVariable* EyePosW;
     ID3DX11EffectVectorVariable* FogColor;
     ID3DX11EffectScalarVariable* FogStart;
@@ -526,6 +538,7 @@ public:
     ID3DX11EffectShaderResourceVariable* DiffuseMap;
     ID3DX11EffectShaderResourceVariable* CubeMap;
     ID3DX11EffectShaderResourceVariable* NormalMap;
+    ID3DX11EffectShaderResourceVariable* ShadowMap;
 };
 #pragma endregion
 
@@ -589,6 +602,70 @@ public:
 };
 #pragma endregion
 
+#pragma region BuildShadowMapEffect
+class BuildShadowMapEffect : public Effect {
+public:
+    BuildShadowMapEffect( ID3D11Device* device, const std::wstring& filename );
+    ~BuildShadowMapEffect();
+
+    void SetViewProj( DirectX::CXMMATRIX M ) { ViewProj->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+    void SetWorldViewProj( DirectX::CXMMATRIX M ) { WorldViewProj->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+    void SetWorld( DirectX::CXMMATRIX M ) { World->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+    void SetWorldInvTranspose( DirectX::CXMMATRIX M ) { WorldInvTranspose->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+    void SetTexTransform( DirectX::CXMMATRIX M ) { TexTransform->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+    void SetEyePosW( const DirectX::XMFLOAT3& v ) { EyePosW->SetRawValue( &v, 0, sizeof( DirectX::XMFLOAT3 ) ); }
+
+    void SetHeightScale( float f ) { HeightScale->SetFloat( f ); }
+    void SetMaxTessDistance( float f ) { MaxTessDistance->SetFloat( f ); }
+    void SetMinTessDistance( float f ) { MinTessDistance->SetFloat( f ); }
+    void SetMinTessFactor( float f ) { MinTessFactor->SetFloat( f ); }
+    void SetMaxTessFactor( float f ) { MaxTessFactor->SetFloat( f ); }
+
+    void SetDiffuseMap( ID3D11ShaderResourceView* tex ) { DiffuseMap->SetResource( tex ); }
+    void SetNormalMap( ID3D11ShaderResourceView* tex ) { NormalMap->SetResource( tex ); }
+
+    ID3DX11EffectTechnique* BuildShadowMapTech;
+    ID3DX11EffectTechnique* BuildShadowMapAlphaClipTech;
+    ID3DX11EffectTechnique* TessBuildShadowMapTech;
+    ID3DX11EffectTechnique* TessBuildShadowMapAlphaClipTech;
+
+    ID3DX11EffectMatrixVariable* ViewProj;
+    ID3DX11EffectMatrixVariable* WorldViewProj;
+    ID3DX11EffectMatrixVariable* World;
+    ID3DX11EffectMatrixVariable* WorldInvTranspose;
+    ID3DX11EffectMatrixVariable* TexTransform;
+    ID3DX11EffectVectorVariable* EyePosW;
+    ID3DX11EffectScalarVariable* HeightScale;
+    ID3DX11EffectScalarVariable* MaxTessDistance;
+    ID3DX11EffectScalarVariable* MinTessDistance;
+    ID3DX11EffectScalarVariable* MinTessFactor;
+    ID3DX11EffectScalarVariable* MaxTessFactor;
+
+    ID3DX11EffectShaderResourceVariable* DiffuseMap;
+    ID3DX11EffectShaderResourceVariable* NormalMap;
+};
+#pragma endregion
+
+#pragma region DebugTexEffect
+class DebugTexEffect : public Effect {
+public:
+    DebugTexEffect( ID3D11Device* device, const std::wstring& filename );
+    ~DebugTexEffect();
+
+    void SetWorldViewProj( DirectX::CXMMATRIX M ) { WorldViewProj->SetMatrix( reinterpret_cast<const float*>( &M ) ); }
+    void SetTexture( ID3D11ShaderResourceView* tex ) { Texture->SetResource( tex ); }
+
+    ID3DX11EffectTechnique* ViewArgbTech;
+    ID3DX11EffectTechnique* ViewRedTech;
+    ID3DX11EffectTechnique* ViewGreenTech;
+    ID3DX11EffectTechnique* ViewBlueTech;
+    ID3DX11EffectTechnique* ViewAlphaTech;
+
+    ID3DX11EffectMatrixVariable* WorldViewProj;
+    ID3DX11EffectShaderResourceVariable* Texture;
+};
+#pragma endregion
+
 #pragma region Effects
 class Effects
 {
@@ -604,6 +681,8 @@ public:
     static SkyEffect* SkyFX;
     static NormalMapEffect* NormalMapFX;
     static DisplacementMapEffect* DisplacementMapFX;
+    static BuildShadowMapEffect* BuildShadowMapFX;
+    static DebugTexEffect* DebugTexFX;
     static TerrainEffect* TerrainFX;
 };
 #pragma endregion

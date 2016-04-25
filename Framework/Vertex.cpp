@@ -99,16 +99,16 @@ void InputLayouts::InitAll(ID3D11Device* device)
     // NormalMap
     //
 
-    /*Effects::NormalMapFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    Effects::NormalMapFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
     HR( device->CreateInputLayout( InputLayoutDesc::PosNormalTexTan, 4, passDesc.pIAInputSignature,
-                                   passDesc.IAInputSignatureSize, &PosNormalTexTan ) );*/
+                                   passDesc.IAInputSignatureSize, &PosNormalTexTan ) );
 
     //
     // Terrain
 
-    Effects::TerrainFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    /*Effects::TerrainFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
     HR( device->CreateInputLayout( InputLayoutDesc::Terrain, 3, passDesc.pIAInputSignature,
-                                   passDesc.IAInputSignatureSize, &Terrain ) );
+                                   passDesc.IAInputSignatureSize, &Terrain ) );*/
 }
 
 void InputLayouts::DestroyAll()
