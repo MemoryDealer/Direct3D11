@@ -554,7 +554,7 @@ void App::drawScene( void )
             Effects::BasicFX->SetShadowTransform( world*shadowTransform );
             Effects::BasicFX->SetTexTransform( XMMatrixScaling( 8.0f, 10.0f, 1.0f ) );
             Effects::BasicFX->SetMaterial( mGridMat );
-            Effects::BasicFX->SetDiffuseMap( mStoneTexSRV );
+            Effects::BasicFX->SetDiffuseMap( mSsao->AmbientSRV() );
             break;
         case RenderOptionsNormalMap:
             Effects::NormalMapFX->SetWorld( world );
@@ -751,7 +751,7 @@ void App::drawScene( void )
     mD3DImmediateContext->OMSetDepthStencilState( 0, 0 );
 
     // Debug view SSAO map.
-    DrawScreenQuad( mSsao->AmbientSRV() );
+    DrawScreenQuad( mBrickTexSRV );
 
     mSky->Draw( mD3DImmediateContext, mCam );
 
@@ -1100,25 +1100,28 @@ void App::DrawScreenQuad( ID3D11ShaderResourceView* srv )
     mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mScreenQuadVB, &stride, &offset );
     mD3DImmediateContext->IASetIndexBuffer( mScreenQuadIB, DXGI_FORMAT_R32_UINT, 0 );
 
-    // Scale and shift quad to lower-right corner.
-    XMMATRIX world(
-        0.5f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.5f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.0f, 1.0f );
+	for ( int i = 0; i < 5; ++i )
+	{
+		// Scale and shift quad to lower-right corner.
+		XMMATRIX world(
+			0.25f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.25f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			-0.5f + static_cast<float>( i ) / 4.f, -0.5f, 0.0f, 1.0f );
 
-    ID3DX11EffectTechnique* tech = Effects::DebugTexFX->ViewRedTech;
-    D3DX11_TECHNIQUE_DESC techDesc;
+		ID3DX11EffectTechnique* tech = Effects::DebugTexFX->ViewRedTech;
+		D3DX11_TECHNIQUE_DESC techDesc;
 
-    tech->GetDesc( &techDesc );
-    for ( UINT p = 0; p < techDesc.Passes; ++p )
-    {
-        Effects::DebugTexFX->SetWorldViewProj( world );
-        Effects::DebugTexFX->SetTexture( srv );
+		tech->GetDesc( &techDesc );
+		for ( UINT p = 0; p < techDesc.Passes; ++p )
+		{
+			Effects::DebugTexFX->SetWorldViewProj( world );
+			Effects::DebugTexFX->SetTexture( srv );
 
-        tech->GetPassByIndex( p )->Apply( 0, mD3DImmediateContext );
-        mD3DImmediateContext->DrawIndexed( 6, 0, 0 );
-    }
+			tech->GetPassByIndex( p )->Apply( 0, mD3DImmediateContext );
+			mD3DImmediateContext->DrawIndexed( 6, 0, 0 );
+		}
+	}
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //

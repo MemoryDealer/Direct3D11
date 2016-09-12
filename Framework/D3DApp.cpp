@@ -175,6 +175,7 @@ void D3DApp::onResize( void )
     HR( mD3DDevice->CreateRenderTargetView( backBuffer,
                                             nullptr,
                                             &mRenderTargetView ) );
+
     ReleaseCOM( backBuffer );
 
     // Create depth/stencil buffer and view for it.

@@ -35,10 +35,11 @@ float4 PS( VertexOut pin ) : SV_Target
 
 float4 PS( VertexOut pin, uniform int index ) : SV_Target
 {
-    float4 c = gTexture.Sample( samLinear, pin.Tex ).r;
+    float4 c = gTexture.Sample( samLinear, pin.Tex );
 
     // draw as grayscale
-    return float4( c.rrr, 1 );
+    //return float4( c.rrr, 1 );
+	return c;
 }
 
 technique11 ViewArgbTech {
