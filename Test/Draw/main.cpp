@@ -6,12 +6,13 @@
 #include "d3dx11Effect.h"
 #include "MathHelper.h"
 #include "GeometryGenerator.h"
+#include "Vertex.h"
 
 using namespace DirectX;
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
 #pragma pack(push,1)
-struct Vertex {
+struct Vert {
     DirectX::XMFLOAT3 pos;
     DirectX::XMFLOAT4 color;
 };
@@ -81,6 +82,18 @@ private:
     ID3D11Buffer* mIB;
 
     ID3D11InputLayout* mInputLayout;
+
+	ID3D11RenderTargetView* mRTV;
+	ID3D11Texture2D* mRTTex;
+	ID3D11ShaderResourceView* mSRV;
+
+	ID3D11Buffer* mScreenQuadVB;
+	ID3D11Buffer* mScreenQuadIB;
+
+	ID3D11VertexShader* mQuadVS;
+	ID3D11PixelShader* mQuadPS;
+	ID3D11Buffer* mQuadConstBuffer;
+	ID3D11InputLayout* mQuadInputLayout;
 
     ID3D11RasterizerState* mWireframeRS;
 
@@ -199,6 +212,77 @@ bool App::init( void )
 
     HR( mD3DDevice->CreateRasterizerState( &wireframeDesc, &mWireframeRS ) );
 
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textureDesc.Width = mClientWidth;
+	textureDesc.Height = mClientHeight;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+
+	HR( mD3DDevice->CreateTexture2D( &textureDesc, nullptr, &mRTTex ) );
+
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+	rtvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	rtvDesc.Texture2D.MipSlice = 0;
+	HR( mD3DDevice->CreateRenderTargetView( mRTTex, &rtvDesc, &mRTV ) );
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+	HR( mD3DDevice->CreateShaderResourceView( mRTTex, &srvDesc, &mSRV ) );
+
+	GeometryGenerator::MeshData quad;
+
+	GeometryGenerator geoGen;
+	geoGen.createFullscreenQuad( quad );
+
+	//
+	// Extract the vertex elements we are interested in and pack the
+	// vertices of all the meshes into one vertex buffer.
+	//
+
+	std::vector<Vertex::Basic32> vertices( quad.vertices.size() );
+
+	for ( UINT i = 0; i < quad.vertices.size(); ++i )
+	{
+		vertices[i].pos = quad.vertices[i].position;
+		vertices[i].normal = quad.vertices[i].normal;
+		vertices[i].tex = quad.vertices[i].texC;
+	}
+
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof( Vertex::Basic32 ) * quad.vertices.size();
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	HR( mD3DDevice->CreateBuffer( &vbd, &vinitData, &mScreenQuadVB ) );
+
+	//
+	// Pack the indices of all the meshes into one index buffer.
+	//
+
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof( UINT ) * quad.indices.size();
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &quad.indices[0];
+	HR( mD3DDevice->CreateBuffer( &ibd, &iinitData, &mScreenQuadIB ) );
+
     return true;
 }
 
@@ -238,7 +322,13 @@ void App::updateScene( const float dt )
 
 void App::drawScene( void )
 {
-    mD3DImmediateContext->ClearRenderTargetView( mRenderTargetView,
+	ID3D11RenderTargetView* renderTargets[1] = { mRTV };
+	mD3DImmediateContext->OMSetRenderTargets( 1,
+											  renderTargets,
+											  mDepthStencilView );
+	mD3DImmediateContext->RSSetViewports( 1, &mViewport );
+
+    mD3DImmediateContext->ClearRenderTargetView( mRTV,
                                                  reinterpret_cast<const float*>( &Colors::LightSteelBlue ) );
     mD3DImmediateContext->ClearDepthStencilView( mDepthStencilView,
                                                  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
@@ -250,7 +340,7 @@ void App::drawScene( void )
 
     mD3DImmediateContext->RSSetState( mWireframeRS );
 
-    UINT stride = sizeof( Vertex );
+    UINT stride = sizeof( Vert );
     UINT offset = 0;
     mD3DImmediateContext->IASetVertexBuffers( 0,
                                               1,
@@ -308,6 +398,38 @@ void App::drawScene( void )
         mD3DImmediateContext->UpdateSubresource( gConstBuffer, 0, nullptr, &worldViewProj, 0, 0 );
         mD3DImmediateContext->DrawIndexed( mSphereIndexCount, mSphereIndexOffset, mSphereVertexOffset );
     }
+
+	// {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+	/*ID3D11RenderTargetView* renderTargets2[1] = { mRenderTargetView };
+	mD3DImmediateContext->OMSetRenderTargets( 1, renderTargets2, mDepthStencilView );
+	mD3DImmediateContext->RSSetViewports( 1, &mViewport );
+*/
+	stride = sizeof( Vertex::Basic32 );
+	offset = 0;
+
+	mD3DImmediateContext->RSSetState( nullptr );
+	mD3DImmediateContext->IASetInputLayout( InputLayouts::Basic32 );
+	mD3DImmediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mScreenQuadVB, &stride, &offset );
+	mD3DImmediateContext->IASetIndexBuffer( mScreenQuadIB, DXGI_FORMAT_R32_UINT, 0 );
+
+	
+
+	// Scale and shift quad to lower-right corner.
+	XMMATRIX qworld(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f );
+
+	mD3DImmediateContext->UpdateSubresource( mQuadConstBuffer, 0, nullptr, &qworld, 0, 0 );
+	//mD3DImmediateContext->PSSetShaderResources( 0, 1, &mSRV );
+
+	mD3DImmediateContext->DrawIndexed( 6, 0, 0 );
+
+
+	// }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
     HR( mSwapChain->Present( 0, 0 ) );
 }
@@ -406,7 +528,7 @@ void App::buildGeometryBuffers( void )
         mCylinderIndexCount;
 
     // Pack all vertices into one vertex buffer.
-    std::vector<Vertex> vertices( totalVertexCount );
+    std::vector<Vert> vertices( totalVertexCount );
 
     const DirectX::XMFLOAT4 black( 0.f, 1.f, 0.f, 1.f );
     UINT k = 0;
@@ -431,7 +553,7 @@ void App::buildGeometryBuffers( void )
     D3D11_BUFFER_DESC bd;
     ZeroMemory( &bd, sizeof( bd ) );
     bd.Usage = D3D11_USAGE_IMMUTABLE;
-    bd.ByteWidth = sizeof( Vertex ) * totalVertexCount;
+    bd.ByteWidth = sizeof( Vert ) * totalVertexCount;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     bd.CPUAccessFlags = 0;
     bd.MiscFlags = 0;
@@ -508,70 +630,37 @@ void App::buildFX( void )
     bd.StructureByteStride = 0;
     mD3DDevice->CreateBuffer( &bd, nullptr, &gConstBuffer );
 
-    //Vertex vertices [] =
-    //{
-    //    { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT4( 0.0f, 0.0f, 1.0f, 1.0f ) },
-    //    { XMFLOAT3( 1.0f, 1.0f, -1.0f ), XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ) },
-    //    { XMFLOAT3( 1.0f, 1.0f, 1.0f ), XMFLOAT4( 0.0f, 1.0f, 1.0f, 1.0f ) },
-    //    { XMFLOAT3( -1.0f, 1.0f, 1.0f ), XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) },
-    //    { XMFLOAT3( -1.0f, -1.0f, -1.0f ), XMFLOAT4( 1.0f, 0.0f, 1.0f, 1.0f ) },
-    //    { XMFLOAT3( 1.0f, -1.0f, -1.0f ), XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f ) },
-    //    { XMFLOAT3( 1.0f, -1.0f, 1.0f ), XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f ) },
-    //    { XMFLOAT3( -1.0f, -1.0f, 1.0f ), XMFLOAT4( 0.0f, 0.0f, 0.0f, 1.0f ) },
-    //};
+    // [][][][][][][][][]
 
-    //ZeroMemory( &bd, sizeof( bd ) );
-    //bd.Usage = D3D11_USAGE_DEFAULT;
-    //bd.ByteWidth = sizeof( Vertex ) * 8;
-    //bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    //bd.CPUAccessFlags = 0;
-    //D3D11_SUBRESOURCE_DATA InitData;
-    //ZeroMemory( &InitData, sizeof( InitData ) );
-    //InitData.pSysMem = vertices;
-    //hr = mD3DDevice->CreateBuffer( &bd, &InitData, &mVB );
-    //if ( FAILED( hr ) )
-    //    ;
+	pVSBlob = pPSBlob = nullptr;
 
-    //// Set vertex buffer
-    //UINT stride = sizeof( Vertex );
-    //UINT offset = 0;
-    //mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mVB, &stride, &offset );
+	hr = CompileShader( L"FX/backbuffer.hlsl", "VS", "vs_5_0", &pVSBlob );
 
-    //// Create index buffer
-    //WORD indices [] =
-    //{
-    //    3,1,0,
-    //    2,1,3,
+	hr = mD3DDevice->CreateVertexShader( pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), nullptr, &mQuadVS );
+	D3D11_INPUT_ELEMENT_DESC qvertexDesc[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
 
-    //    0,5,4,
-    //    1,5,0,
+	HR( mD3DDevice->CreateInputLayout( qvertexDesc,
+									   3,
+									   pVSBlob->GetBufferPointer(),
+									   pVSBlob->GetBufferSize(),
+									   &mQuadInputLayout ) );
 
-    //    3,4,7,
-    //    0,4,3,
-
-    //    1,6,5,
-    //    2,6,1,
-
-    //    2,7,6,
-    //    3,7,2,
-
-    //    6,4,5,
-    //    7,4,6,
-    //};
-    //bd.Usage = D3D11_USAGE_DEFAULT;
-    //bd.ByteWidth = sizeof( WORD ) * 36;        // 36 vertices needed for 12 triangles in a triangle list
-    //bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    //bd.CPUAccessFlags = 0;
-    //InitData.pSysMem = indices;
-    //hr = mD3DDevice->CreateBuffer( &bd, &InitData, &mIB );
-    //if ( FAILED( hr ) )
-    //    ;
-
-    //// Set index buffer
-    //mD3DImmediateContext->IASetIndexBuffer( mIB, DXGI_FORMAT_R16_UINT, 0 );
-
-    //// Set primitive topology
-    //mD3DImmediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	hr = CompileShader( L"FX/backbuffer.hlsl", "PS", "ps_5_0", &pPSBlob );
+	hr = mD3DDevice->CreatePixelShader( pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &mQuadPS );
+	pPSBlob->Release(); pVSBlob->Release();
+	// Create const buffer.
+	ZeroMemory( &bd, sizeof( bd ) );
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof( DirectX::XMMATRIX );
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	bd.MiscFlags = 0;
+	bd.StructureByteStride = 0;
+	mD3DDevice->CreateBuffer( &bd, nullptr, &mQuadConstBuffer );
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //

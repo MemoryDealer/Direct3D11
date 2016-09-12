@@ -51,6 +51,9 @@
     <ClCompile Include="..\..\Framework\Waves.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Framework\Vertex.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Framework\Camera.h">
@@ -86,9 +89,15 @@
     <ClInclude Include="..\..\Framework\Waves.h">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Framework\Vertex.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FX\basic.hlsl">
+      <Filter>FX</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\backbuffer.hlsl">
       <Filter>FX</Filter>
     </FxCompile>
   </ItemGroup>

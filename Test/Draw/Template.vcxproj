@@ -151,6 +151,7 @@
     <ClCompile Include="..\..\Framework\LightHelper.cpp" />
     <ClCompile Include="..\..\Framework\MathHelper.cpp" />
     <ClCompile Include="..\..\Framework\TextureMgr.cpp" />
+    <ClCompile Include="..\..\Framework\Vertex.cpp" />
     <ClCompile Include="..\..\Framework\Waves.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -165,9 +166,14 @@
     <ClInclude Include="..\..\Framework\LightHelper.h" />
     <ClInclude Include="..\..\Framework\MathHelper.h" />
     <ClInclude Include="..\..\Framework\TextureMgr.h" />
+    <ClInclude Include="..\..\Framework\Vertex.h" />
     <ClInclude Include="..\..\Framework\Waves.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="FX\backbuffer.hlsl">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="FX\basic.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
