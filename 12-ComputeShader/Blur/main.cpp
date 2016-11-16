@@ -48,7 +48,7 @@ private:
 
     void UpdateWaves();
     void DrawWrapper();
-    void DrawScreenQuad();
+    void DrawScreenQuad( ID3D11ShaderResourceView* srv );
     float GetHillHeight( float x, float z ) const;
     XMFLOAT3 GetHillNormal( float x, float z ) const;
     void BuildLandGeometryBuffers();
@@ -315,7 +315,6 @@ void App::updateScene( const float dt )
     // Every quarter second, generate a random wave.
     //
     static float t_base = 0.0f;
-    static bool blurUp = true;
     if ( ( mTimer.totalTime() - t_base ) >= 0.1f )
     {
         t_base += 0.1f;
@@ -326,20 +325,6 @@ void App::updateScene( const float dt )
         float r = MathHelper::RandF( 0.5f, 1.0f );
 
         mWaves.Disturb( i, j, r );
-
-
-        if ( blurUp ) {
-            mBlurStrength += 8;
-            if ( mBlurStrength > 64 ) {
-                blurUp = false;
-            }
-        }
-        else {
-            mBlurStrength -= 8;
-            if ( mBlurStrength < 8 ) {
-                blurUp = true;
-            }
-        }
     }
 
     mWaves.Update( dt );
@@ -407,12 +392,12 @@ void App::drawScene( void )
     mD3DImmediateContext->OMSetRenderTargets( 1, renderTargets, mDepthStencilView );
 
     // Blur offscreen buffer.
-    mBlur.BlurInPlace( mD3DImmediateContext, mOffscreenSRV, mOffscreenUAV, mBlurStrength );
+    //mBlur.BlurInPlace( mD3DImmediateContext, mOffscreenSRV, mOffscreenUAV, mBlurStrength );
 
     mD3DImmediateContext->ClearRenderTargetView( mRenderTargetView, reinterpret_cast<const float*>( &Colors::Silver ) );
     mD3DImmediateContext->ClearDepthStencilView( mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0 );
 
-    DrawScreenQuad();
+    DrawScreenQuad( mOffscreenSRV );
 
     HR( mSwapChain->Present( 0, 0 ) );
 }
@@ -548,7 +533,7 @@ void App::DrawWrapper( void )
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-void App::DrawScreenQuad()
+void App::DrawScreenQuad( ID3D11ShaderResourceView* srv )
 {
     mD3DImmediateContext->IASetInputLayout( InputLayouts::Basic32 );
     mD3DImmediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
@@ -557,6 +542,7 @@ void App::DrawScreenQuad()
     UINT offset = 0;
 
     XMMATRIX identity = XMMatrixIdentity();
+	identity = XMMatrixScaling( 0.5f, 0.5f, 1.f );
 
     ID3DX11EffectTechnique* texOnlyTech = Effects::BasicFX->Light0TexTech;
     D3DX11_TECHNIQUE_DESC techDesc;
@@ -571,7 +557,8 @@ void App::DrawScreenQuad()
         Effects::BasicFX->SetWorldInvTranspose( identity );
         Effects::BasicFX->SetWorldViewProj( identity );
         Effects::BasicFX->SetTexTransform( identity );
-        Effects::BasicFX->SetDiffuseMap( mBlur.GetBlurredOutput() );
+        //Effects::BasicFX->SetDiffuseMap( mBlur.GetBlurredOutput() );
+		Effects::BasicFX->SetDiffuseMap( srv );
 
         texOnlyTech->GetPassByIndex( p )->Apply( 0, mD3DImmediateContext );
         mD3DImmediateContext->DrawIndexed( 6, 0, 0 );

@@ -154,3 +154,8 @@ void BlurFilter::BlurInPlace(ID3D11DeviceContext* dc,
 	// Disable compute shader.
 	dc->CSSetShader(0, 0, 0);
 }
+
+void BlurFilter::postProcess( ID3D11DeviceContext* dc, ID3D11ShaderResourceView* inputSRV, ID3D11UnorderedAccessView* inputUAV )
+{
+
+}

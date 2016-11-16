@@ -151,6 +151,21 @@ float4 PS( VertexOut pin, uniform int gLightCount, uniform bool gUseTexture, uni
     // Common to take alpha from diffuse material and texture.
     pixel.a = gMaterial.diffuse.a * texColor.a;
 
+	// B/W
+	/*float gs = dot( pixel.rgb, float3( 0.3, 0.59, 0.11 ) );
+	pixel.r = gs;
+	pixel.g = gs;
+	pixel.b = gs;*/
+
+	// Sepia
+	/*pixel.r = ( pixel.r * .393 ) + ( pixel.g * .769 ) + ( pixel.b * .189 );
+	pixel.g = ( pixel.r * .349 ) + ( pixel.g * .686 ) + ( pixel.b * .168 );
+	pixel.b = ( pixel.r * .272 ) + ( pixel.g * .534 ) + ( pixel.b * .131 );*/
+
+	// Night vision
+	/*float c = dot( pixel, float4( 0.2, 0.6, 0.1, 0.1 ) );
+	return float4( 0, c, 0, 0 );*/
+
     return pixel;
 }
 

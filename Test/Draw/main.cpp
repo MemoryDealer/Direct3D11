@@ -401,33 +401,29 @@ void App::drawScene( void )
 
 	// {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-	/*ID3D11RenderTargetView* renderTargets2[1] = { mRenderTargetView };
-	mD3DImmediateContext->OMSetRenderTargets( 1, renderTargets2, mDepthStencilView );
-	mD3DImmediateContext->RSSetViewports( 1, &mViewport );
-*/
 	stride = sizeof( Vertex::Basic32 );
-	offset = 0;
+
+	renderTargets[0] = mRenderTargetView;
+	mD3DImmediateContext->OMSetRenderTargets( 1, renderTargets, mDepthStencilView );
 
 	mD3DImmediateContext->RSSetState( nullptr );
-	mD3DImmediateContext->IASetInputLayout( InputLayouts::Basic32 );
-	mD3DImmediateContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+
+	mD3DImmediateContext->ClearRenderTargetView( mRenderTargetView, reinterpret_cast< const float* >( &Colors::Magenta ) );
+	mD3DImmediateContext->ClearDepthStencilView( mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0.f );
+
+	mD3DImmediateContext->IASetInputLayout( mQuadInputLayout );
 	mD3DImmediateContext->IASetVertexBuffers( 0, 1, &mScreenQuadVB, &stride, &offset );
 	mD3DImmediateContext->IASetIndexBuffer( mScreenQuadIB, DXGI_FORMAT_R32_UINT, 0 );
 
+	mD3DImmediateContext->VSSetShader( mQuadVS, nullptr, 0 );
+	mD3DImmediateContext->PSSetShader( mQuadPS, nullptr, 0 );
+	mD3DImmediateContext->PSSetShaderResources( 0, 1, &mSRV );
+
+	auto quad = XMMatrixIdentity();
+	mD3DImmediateContext->UpdateSubresource( mQuadConstBuffer, 0, nullptr, &quad, 0, 0 );
+	mD3DImmediateContext->PSSetConstantBuffers( 0, 1, &mQuadConstBuffer );
 	
-
-	// Scale and shift quad to lower-right corner.
-	XMMATRIX qworld(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f );
-
-	mD3DImmediateContext->UpdateSubresource( mQuadConstBuffer, 0, nullptr, &qworld, 0, 0 );
-	//mD3DImmediateContext->PSSetShaderResources( 0, 1, &mSRV );
-
 	mD3DImmediateContext->DrawIndexed( 6, 0, 0 );
-
 
 	// }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 

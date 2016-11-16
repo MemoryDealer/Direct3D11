@@ -63,52 +63,52 @@ ID3D11InputLayout* InputLayouts::Terrain = nullptr;
 
 void InputLayouts::InitAll(ID3D11Device* device)
 {
-	////
-	//// Basic32
-	////
+	//
+	// Basic32
+	//
 
-	//D3DX11_PASS_DESC passDesc;
-	//Effects::BasicFX->Light1Tech->GetPassByIndex(0)->GetDesc(&passDesc);
-	//HR(device->CreateInputLayout(InputLayoutDesc::Basic32, 3, passDesc.pIAInputSignature, 
-	//	passDesc.IAInputSignatureSize, &Basic32));
+	/*D3DX11_PASS_DESC passDesc;
+	Effects::BasicFX->Light1Tech->GetPassByIndex(0)->GetDesc(&passDesc);
+	HR(device->CreateInputLayout(InputLayoutDesc::Basic32, 3, passDesc.pIAInputSignature,
+		passDesc.IAInputSignatureSize, &Basic32));*/
 
- //   //
- //   // Pos
- //   //
+    //
+    // Pos
+    //
 
- //   Effects::SkyFX->SkyTech->GetPassByIndex( 0 )->GetDesc( &passDesc );
- //   HR( device->CreateInputLayout( InputLayoutDesc::Pos, 1, passDesc.pIAInputSignature,
- //                                  passDesc.IAInputSignatureSize, &Pos ) );
+	/*Effects::SkyFX->SkyTech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+	HR( device->CreateInputLayout( InputLayoutDesc::Pos, 1, passDesc.pIAInputSignature,
+								   passDesc.IAInputSignatureSize, &Pos ) );*/
 
- //  /* Effects::BezierTessellationFX->TessTech->GetPassByIndex( 0 )->GetDesc( &passDesc );
- //   HR( device->CreateInputLayout( InputLayoutDesc::Pos, 1, passDesc.pIAInputSignature,
- //                                  passDesc.IAInputSignatureSize, &Pos ) );*/
+   /* Effects::BezierTessellationFX->TessTech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    HR( device->CreateInputLayout( InputLayoutDesc::Pos, 1, passDesc.pIAInputSignature,
+                                   passDesc.IAInputSignatureSize, &Pos ) );*/
 
- //   //
- //   // TreePointSprite
+    //
+    // TreePointSprite
 
- //   /*Effects::TreeSpriteFX->Light3Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
- //   HR( device->CreateInputLayout( InputLayoutDesc::TreePointSprite, 2, passDesc.pIAInputSignature,
- //                                  passDesc.IAInputSignatureSize, &TreePointSprite ) );*/
+    /*Effects::TreeSpriteFX->Light3Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    HR( device->CreateInputLayout( InputLayoutDesc::TreePointSprite, 2, passDesc.pIAInputSignature,
+                                   passDesc.IAInputSignatureSize, &TreePointSprite ) );*/
 
- //   /*Effects::InstancedBasicFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
- //   HR( device->CreateInputLayout( InputLayoutDesc::InstancedBasic32, 8, passDesc.pIAInputSignature,
- //                                  passDesc.IAInputSignatureSize, &InstancedBasic32 ) );*/
+    /*Effects::InstancedBasicFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    HR( device->CreateInputLayout( InputLayoutDesc::InstancedBasic32, 8, passDesc.pIAInputSignature,
+                                   passDesc.IAInputSignatureSize, &InstancedBasic32 ) );*/
 
- //   //
- //   // NormalMap
- //   //
+    //
+    // NormalMap
+    //
 
- //   Effects::NormalMapFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
- //   HR( device->CreateInputLayout( InputLayoutDesc::PosNormalTexTan, 4, passDesc.pIAInputSignature,
- //                                  passDesc.IAInputSignatureSize, &PosNormalTexTan ) );
+	/*Effects::NormalMapFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+	HR( device->CreateInputLayout( InputLayoutDesc::PosNormalTexTan, 4, passDesc.pIAInputSignature,
+								   passDesc.IAInputSignatureSize, &PosNormalTexTan ) );*/
 
- //   //
- //   // Terrain
+    //
+    // Terrain
 
- //   /*Effects::TerrainFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
- //   HR( device->CreateInputLayout( InputLayoutDesc::Terrain, 3, passDesc.pIAInputSignature,
- //                                  passDesc.IAInputSignatureSize, &Terrain ) );*/
+    /*Effects::TerrainFX->Light1Tech->GetPassByIndex( 0 )->GetDesc( &passDesc );
+    HR( device->CreateInputLayout( InputLayoutDesc::Terrain, 3, passDesc.pIAInputSignature,
+                                   passDesc.IAInputSignatureSize, &Terrain ) );*/
 }
 
 void InputLayouts::DestroyAll()

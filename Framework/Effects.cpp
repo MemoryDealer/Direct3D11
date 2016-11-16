@@ -585,18 +585,18 @@ void Effects::InitAll(ID3D11Device* device)
 {
 	BasicFX = new BasicEffect(device, L"FX/Basic.fxo");
     //TreeSpriteFX = new TreeSpriteEffect( device, L"FX/TreeSprite.fxo" );
-    //BlurFX = new BlurEffect( device, L"FX/Blur.fxo" );
+    BlurFX = new BlurEffect( device, L"FX/Blur.fxo" );
     //BezierTessellationFX = new BezierTessellationEffect( device, L"FX/BezierTessellation.fxo" );
     //InstancedBasicFX = new InstancedBasicEffect( device, L"FX/InstancedBasic.fxo" );
-    SkyFX = new SkyEffect( device, L"FX/Sky.fxo" );
-    NormalMapFX = new NormalMapEffect( device, L"FX/NormalMap.fxo" );
-    DisplacementMapFX = new DisplacementMapEffect( device, L"FX/DisplacementMap.fxo" );
+    //SkyFX = new SkyEffect( device, L"FX/Sky.fxo" );
+    //NormalMapFX = new NormalMapEffect( device, L"FX/NormalMap.fxo" );
+   // DisplacementMapFX = new DisplacementMapEffect( device, L"FX/DisplacementMap.fxo" );
     //TerrainFX = new TerrainEffect( device, L"FX/Terrain.fxo" );
-    BuildShadowMapFX = new BuildShadowMapEffect( device, L"FX/BuildShadowMap.fxo" );
+   // BuildShadowMapFX = new BuildShadowMapEffect( device, L"FX/BuildShadowMap.fxo" );
     DebugTexFX = new DebugTexEffect( device, L"FX/DebugTexture.fxo" );
-    SsaoNormalDepthFX = new SsaoNormalDepthEffect( device, L"FX/SsaoNormalDepth.fxo" );
-    SsaoFX = new SsaoEffect( device, L"FX/Ssao.fxo" );
-    SsaoBlurFX = new SsaoBlurEffect( device, L"FX/SsaoBlur.fxo" );
+   // SsaoNormalDepthFX = new SsaoNormalDepthEffect( device, L"FX/SsaoNormalDepth.fxo" );
+   // SsaoFX = new SsaoEffect( device, L"FX/Ssao.fxo" );
+   // SsaoBlurFX = new SsaoBlurEffect( device, L"FX/SsaoBlur.fxo" );
 }
 
 void Effects::DestroyAll()

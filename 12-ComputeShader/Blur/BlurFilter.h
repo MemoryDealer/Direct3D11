@@ -37,6 +37,8 @@ public:
 	///</summary>
 	void BlurInPlace(ID3D11DeviceContext* dc, ID3D11ShaderResourceView* inputSRV, ID3D11UnorderedAccessView* inputUAV, int blurCount);
 
+	void postProcess( ID3D11DeviceContext* dc, ID3D11ShaderResourceView* inputSRV, ID3D11UnorderedAccessView* inputUAV );
+
 private:
 
 	UINT mWidth;

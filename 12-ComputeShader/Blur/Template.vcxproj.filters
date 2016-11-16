@@ -121,5 +121,8 @@
     <FxCompile Include="FX\Blur.fx">
       <Filter>FX</Filter>
     </FxCompile>
+    <FxCompile Include="FX\DebugTexture.fx">
+      <Filter>FX</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
